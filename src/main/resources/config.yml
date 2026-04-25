@@ -1,10 +1,26 @@
-storage: FILE
-mode: hardcore
-maxLives: 10
-defaultLives: 3
+# 🎮 Spielmodus
+mode: LIFESTEAL
 
+# ❤️ Start Leben pro Spieler
+start-lives: 10
+
+# 🧠 Storage System
+storage:
+  type: FILE # FILE oder MYSQL
+
+# 🗄️ MySQL Einstellungen (nur wenn type: MYSQL)
 mysql:
   host: localhost
-  database: minecraft
+  port: 3306
+  database: lifedb
   user: root
-  password: pass
+  password: password
+
+# 🧛 Lifesteal Einstellungen
+lifesteal:
+  steal-amount: 1
+  max-lives: 20
+
+# 💀 Hardcore Einstellungen
+hardcore:
+  ban-on-zero: false
