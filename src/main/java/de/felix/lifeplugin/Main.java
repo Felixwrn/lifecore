@@ -2,34 +2,35 @@ package de.felix.lifeplugin;
 
 import de.felix.lifeplugin.gui.LifeGUI;
 import de.felix.lifeplugin.lang.LanguageManager;
-import de.felix.lifeplugin.storage.FileStorage;
-import de.felix.lifeplugin.storage.MySQLStorage;
-import de.felix.lifeplugin.storage.Storage;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import de.felix.lifeplugin.storage.*;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.UUID;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 public class Main extends JavaPlugin implements Listener {
 
     private static Main instance;
 
     private LanguageManager languageManager;
-    private final HashMap<UUID, Integer> lives = new HashMap<>();
-
     private Storage storage;
 
+    private final HashMap<UUID, Integer> lives = new HashMap<>();
+
     private String mode;
+
+    private File langConfigFile;
+    private YamlConfiguration langConfig;
 
     @Override
     public void onEnable() {
@@ -37,19 +38,17 @@ public class Main extends JavaPlugin implements Listener {
         instance = this;
 
         saveDefaultConfig();
+        loadLangConfig();
 
-        // 🌍 Language
         languageManager = new LanguageManager();
         languageManager.load(new File(getDataFolder(), "lang"));
 
-        // ⚙ Mode aus config
         mode = getConfig().getString("mode", "LIFESTEAL");
 
-        // 💾 Storage Auswahl
+        // Storage
         String type = getConfig().getString("storage.type");
 
-        if (type != null && type.equalsIgnoreCase("MYSQL")) {
-
+        if ("MYSQL".equalsIgnoreCase(type)) {
             storage = new MySQLStorage(
                     getConfig().getString("mysql.host"),
                     getConfig().getInt("mysql.port"),
@@ -57,18 +56,23 @@ public class Main extends JavaPlugin implements Listener {
                     getConfig().getString("mysql.user"),
                     getConfig().getString("mysql.password")
             );
-
-            getLogger().info("Using MySQL Storage");
-
         } else {
-
             storage = new FileStorage(getDataFolder());
-            getLogger().info("Using File Storage");
         }
 
         getServer().getPluginManager().registerEvents(this, this);
 
         getLogger().info("LifePlugin enabled!");
+    }
+
+    private void loadLangConfig() {
+        langConfigFile = new File(getDataFolder(), "languages.yml");
+
+        if (!langConfigFile.exists()) {
+            saveResource("languages.yml", false);
+        }
+
+        langConfig = YamlConfiguration.loadConfiguration(langConfigFile);
     }
 
     public static Main getInstance() {
@@ -79,29 +83,22 @@ public class Main extends JavaPlugin implements Listener {
         return languageManager;
     }
 
-    // ❤️ Lives (mit config fallback)
     public int getLives(UUID uuid) {
         return lives.getOrDefault(uuid, getConfig().getInt("start-lives", 10));
     }
 
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    // 🧍 JOIN → lädt aus Storage
+    // JOIN
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-
         Player p = e.getPlayer();
 
-        int saved = storage.getLives(p.getUniqueId());
-
-        lives.put(p.getUniqueId(), saved);
+        int loaded = storage.getLives(p.getUniqueId());
+        lives.put(p.getUniqueId(), loaded);
 
         updateActionBar(p);
     }
 
-    // 💀 DEATH
+    // DEATH
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
@@ -110,136 +107,95 @@ public class Main extends JavaPlugin implements Listener {
         int current = getLives(p.getUniqueId()) - 1;
 
         lives.put(p.getUniqueId(), current);
-
         storage.setLives(p.getUniqueId(), current);
         storage.save(p.getUniqueId());
 
         if (current <= 0) {
-
-            lives.remove(p.getUniqueId());
-
-            boolean ban = getConfig().getBoolean("hardcore.ban-on-zero", false);
-
-            if (mode.equalsIgnoreCase("HARDCORE")) {
-
-                if (ban) {
-                    p.banPlayer(languageManager.get(p.getUniqueId(), "no_lives"));
-                } else {
-                    p.kickPlayer(languageManager.get(p.getUniqueId(), "no_lives"));
-                }
-
-            } else {
-                p.sendMessage(languageManager.get(p.getUniqueId(), "no_lives"));
-            }
-
+            p.kickPlayer(languageManager.get(p.getUniqueId(), "no_lives"));
             return;
         }
 
         Player killer = p.getKiller();
 
-        // 🧛 Lifesteal
         if (killer != null && mode.equalsIgnoreCase("LIFESTEAL")) {
 
             int steal = getConfig().getInt("lifesteal.steal-amount", 1);
             int max = getConfig().getInt("lifesteal.max-lives", 20);
 
-            int killerLives = Math.min(getLives(killer.getUniqueId()) + steal, max);
+            int newLives = Math.min(getLives(killer.getUniqueId()) + steal, max);
 
-            lives.put(killer.getUniqueId(), killerLives);
-
-            storage.setLives(killer.getUniqueId(), killerLives);
+            lives.put(killer.getUniqueId(), newLives);
+            storage.setLives(killer.getUniqueId(), newLives);
             storage.save(killer.getUniqueId());
-
-            killer.sendMessage("§a+" + steal + " Life");
         }
-
-        getServer().getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
 
-    // 📊 ActionBar
     private void updateActionBar(Player p) {
-
-        int l = getLives(p.getUniqueId());
-
         String msg = languageManager.format(
                 p.getUniqueId(),
                 "lives",
-                "lives", String.valueOf(l)
+                "lives", String.valueOf(getLives(p.getUniqueId()))
         );
-
         p.sendActionBar(msg);
     }
 
-    // 🚫 GUI Schutz
+    // GUI BLOCK
     @EventHandler
-    public void onInvClick(InventoryClickEvent e) {
-
-        if (e.getView().getTitle().equals(LifeGUI.getTitle())) {
-            e.setCancelled(true);
-        }
+    public void onClick(InventoryClickEvent e) {
+        if (e.getView().getTitle().equals(LifeGUI.getTitle())) e.setCancelled(true);
     }
 
     @EventHandler
-    public void onInvDrag(InventoryDragEvent e) {
-
-        if (e.getView().getTitle().equals(LifeGUI.getTitle())) {
-            e.setCancelled(true);
-        }
+    public void onDrag(InventoryDragEvent e) {
+        if (e.getView().getTitle().equals(LifeGUI.getTitle())) e.setCancelled(true);
     }
 
-    // ⌨ Commands
+    // COMMANDS
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (!(sender instanceof Player p)) return true;
 
-        // 🌍 Language
+        // LANGUAGE DOWNLOAD
         if (cmd.getName().equalsIgnoreCase("language")) {
 
-            if (args.length == 0) {
-                p.sendMessage("§cUse: /language <de|en>");
+            if (args.length == 2 && args[0].equalsIgnoreCase("download")) {
+                downloadLanguage(args[1], p);
                 return true;
             }
 
-            languageManager.setLanguage(p.getUniqueId(), args[0]);
-            p.sendMessage("§aLanguage set to " + args[0]);
-
-            return true;
-        }
-
-        // ⚙ Mode (nur 2 erlaubt)
-        if (cmd.getName().equalsIgnoreCase("mode")) {
-
-            if (!p.isOp()) return true;
-
-            if (args.length == 0) {
-                p.sendMessage("§cUse: /mode <hardcore|lifesteal>");
+            if (args.length == 1) {
+                languageManager.setLanguage(p.getUniqueId(), args[0]);
+                p.sendMessage("§aLanguage set to " + args[0]);
                 return true;
             }
-
-            String input = args[0].toLowerCase();
-
-            if (input.equals("hardcore")) {
-
-                mode = "HARDCORE";
-                p.sendMessage("§aMode set to HARDCORE");
-
-            } else if (input.equals("lifesteal")) {
-
-                mode = "LIFESTEAL";
-                p.sendMessage("§aMode set to LIFESTEAL");
-
-            } else {
-
-                p.sendMessage("§cOnly hardcore or lifesteal allowed!");
-            }
-
-            return true;
         }
 
-        // 📦 GUI
+        // RELOAD
+        if (cmd.getName().equalsIgnoreCase("lifecore")) {
+
+            if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
+
+                reloadConfig();
+                loadLangConfig();
+
+                languageManager.load(new File(getDataFolder(), "lang"));
+
+                mode = getConfig().getString("mode", "LIFESTEAL");
+
+                for (Player online : getServer().getOnlinePlayers()) {
+                    int loaded = storage.getLives(online.getUniqueId());
+                    lives.put(online.getUniqueId(), loaded);
+                    updateActionBar(online);
+                }
+
+                p.sendMessage("§aReloaded!");
+                return true;
+            }
+        }
+
+        // GUI
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
-
             LifeGUI.open(p);
             return true;
         }
@@ -247,8 +203,47 @@ public class Main extends JavaPlugin implements Listener {
         return false;
     }
 
+    // DOWNLOAD
+    private void downloadLanguage(String lang, Player p) {
+
+        getServer().getScheduler().runTaskAsynchronously(this, () -> {
+
+            try {
+                String urlStr = langConfig.getString("languages." + lang);
+
+                if (urlStr == null) {
+                    p.sendMessage("§cLanguage not found!");
+                    return;
+                }
+
+                URL url = new URL(urlStr);
+
+                File folder = new File(getDataFolder(), "lang");
+                if (!folder.exists()) folder.mkdirs();
+
+                File file = new File(folder, lang + ".json");
+
+                Files.copy(url.openStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                p.sendMessage("§aDownloaded " + lang);
+
+                languageManager.load(folder);
+
+            } catch (Exception e) {
+                p.sendMessage("§cDownload failed!");
+                e.printStackTrace();
+            }
+        });
+    }
+
     @Override
     public void onDisable() {
+
+        for (UUID uuid : lives.keySet()) {
+            storage.setLives(uuid, lives.get(uuid));
+            storage.save(uuid);
+        }
+
         getLogger().info("LifePlugin disabled!");
     }
 }
