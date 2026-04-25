@@ -11,6 +11,9 @@ commands:
   mode:
     description: Setzt den Spielmodus (HARDCORE / LIFESTEAL)
     usage: /mode <HARDCORE|LIFESTEAL>
+  language::
+    descripton: änder die sprache des plugins
+    usage: /language <de|en>
 
 permissions:
   lifeplugin.admin:
