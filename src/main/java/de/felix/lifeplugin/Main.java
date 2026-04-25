@@ -1,7 +1,7 @@
 package de.felix.lifeplugin;
 
+import de.felix.lifeplugin.gui.LifeGUI;
 import de.felix.lifeplugin.lang.LanguageManager;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -32,11 +32,10 @@ public class Main extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
 
-        // 🌍 Language System
         languageManager = new LanguageManager();
         languageManager.load(new File(getDataFolder(), "lang"));
 
-        Bukkit.getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(this, this);
 
         getLogger().info("LifePlugin enabled!");
     }
@@ -45,12 +44,12 @@ public class Main extends JavaPlugin implements Listener {
         return instance;
     }
 
-    // 🔥 FIX → Diese Methode hat gefehlt
+    // 📦 Lives Getter
     public int getLives(UUID uuid) {
         return lives.getOrDefault(uuid, 10);
     }
 
-    // 🧍 Player Join
+    // 🧍 Join
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
@@ -61,7 +60,7 @@ public class Main extends JavaPlugin implements Listener {
         updateActionBar(p);
     }
 
-    // 💀 Player Death
+    // 💀 Death System
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
@@ -72,6 +71,8 @@ public class Main extends JavaPlugin implements Listener {
         lives.put(p.getUniqueId(), current);
 
         if (current <= 0) {
+
+            lives.remove(p.getUniqueId());
 
             if (mode.equalsIgnoreCase("HARDCORE")) {
                 p.kickPlayer(languageManager.get(p.getUniqueId(), "no_lives"));
@@ -87,16 +88,14 @@ public class Main extends JavaPlugin implements Listener {
         // 🧛 Lifesteal
         if (killer != null && mode.equalsIgnoreCase("LIFESTEAL")) {
 
-            int steal = 1;
-
             int killerLives = getLives(killer.getUniqueId());
 
-            lives.put(killer.getUniqueId(), killerLives + steal);
+            lives.put(killer.getUniqueId(), killerLives + 1);
 
             killer.sendMessage("§a+1 Life");
         }
 
-        Bukkit.getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
+        getServer().getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
 
     // 📊 ActionBar
@@ -110,7 +109,7 @@ public class Main extends JavaPlugin implements Listener {
                 "lives", String.valueOf(l)
         );
 
-        ActionBarUtil.send(p, msg);
+        p.sendActionBar(msg);
     }
 
     // 🚫 GUI Protection
@@ -122,14 +121,13 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    // ⌨️ Commands
+    // ⌨ Commands
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
-        if (!(sender instanceof Player)) return true;
-        Player p = (Player) sender;
+        if (!(sender instanceof Player p)) return true;
 
-        // 🌍 Language Command
+        // 🌍 Language
         if (cmd.getName().equalsIgnoreCase("language")) {
 
             if (args.length == 0) {
@@ -144,7 +142,7 @@ public class Main extends JavaPlugin implements Listener {
             return true;
         }
 
-        // ⚙ Mode Command (Admin)
+        // ⚙ Mode
         if (cmd.getName().equalsIgnoreCase("mode")) {
 
             if (!p.isOp()) return true;
@@ -158,12 +156,19 @@ public class Main extends JavaPlugin implements Listener {
             return true;
         }
 
+        // 📦 Lives GUI
+        if (cmd.getName().equalsIgnoreCase("livesgui")) {
+
+            LifeGUI.open(p);
+
+            return true;
+        }
+
         return false;
     }
 
     @Override
     public void onDisable() {
-
         getLogger().info("LifePlugin disabled!");
     }
 }
