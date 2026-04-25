@@ -4,12 +4,14 @@ main: de.felix.lifeplugin.Main
 api-version: 1.21
 
 commands:
-  livesgui:
-    description: Open Lives GUI
+  lifecore:
+    description: Main command
+    usage: /lifecore reload
   language:
-    description: Change language
-  mode:
-    description: Change mode
+    description: Change or download language
+    usage: /language <lang> | /language download <lang>
+  livesgui:
+    description: Open lives GUI
 
 permissions:
   lifeplugin.admin:
