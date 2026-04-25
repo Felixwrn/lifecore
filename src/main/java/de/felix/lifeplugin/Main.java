@@ -38,11 +38,16 @@ public class Main extends JavaPlugin implements Listener {
 
         Bukkit.getPluginManager().registerEvents(this, this);
 
-        getLogger().info("LifeCore enabled!");
+        getLogger().info("LifePlugin enabled!");
     }
 
     public static Main getInstance() {
         return instance;
+    }
+
+    // 🔥 FIX → Diese Methode hat gefehlt
+    public int getLives(UUID uuid) {
+        return lives.getOrDefault(uuid, 10);
     }
 
     // 🧍 Player Join
@@ -62,8 +67,7 @@ public class Main extends JavaPlugin implements Listener {
 
         Player p = e.getEntity();
 
-        int current = lives.getOrDefault(p.getUniqueId(), 10);
-        current--;
+        int current = getLives(p.getUniqueId()) - 1;
 
         lives.put(p.getUniqueId(), current);
 
@@ -85,7 +89,7 @@ public class Main extends JavaPlugin implements Listener {
 
             int steal = 1;
 
-            int killerLives = lives.getOrDefault(killer.getUniqueId(), 10);
+            int killerLives = getLives(killer.getUniqueId());
 
             lives.put(killer.getUniqueId(), killerLives + steal);
 
@@ -98,7 +102,7 @@ public class Main extends JavaPlugin implements Listener {
     // 📊 ActionBar
     private void updateActionBar(Player p) {
 
-        int l = lives.getOrDefault(p.getUniqueId(), 10);
+        int l = getLives(p.getUniqueId());
 
         String msg = languageManager.format(
                 p.getUniqueId(),
@@ -122,7 +126,8 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
-        if (!(sender instanceof Player p)) return true;
+        if (!(sender instanceof Player)) return true;
+        Player p = (Player) sender;
 
         // 🌍 Language Command
         if (cmd.getName().equalsIgnoreCase("language")) {
@@ -159,6 +164,6 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
 
-        getLogger().info("LifeCore disabled!");
+        getLogger().info("LifePlugin disabled!");
     }
 }
