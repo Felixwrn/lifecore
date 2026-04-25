@@ -10,6 +10,8 @@ commands:
   language:
     description: Change or download language
     usage: /language <lang> | /language download <lang>
+  langgui:
+    description: opens language GUI
   livesgui:
     description: Open lives GUI
 
