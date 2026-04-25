@@ -1,5 +1,6 @@
 package de.felix.lifeplugin.gui;
 
+import de.felix.lifeplugin.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,7 +23,7 @@ public class LifeGUI {
         ItemStack heart = new ItemStack(Material.RED_DYE);
         ItemMeta meta = heart.getItemMeta();
 
-        if (meta == null) return; // safety fix
+        if (meta == null) return;
 
         meta.setDisplayName("§cLeben");
 
@@ -38,7 +39,6 @@ public class LifeGUI {
         p.openInventory(inv);
     }
 
-    // 🔒 Optional: für GUI-Schutz in Main.java wichtig
     public static String getTitle() {
         return TITLE;
     }
