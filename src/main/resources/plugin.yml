@@ -5,15 +5,11 @@ api-version: 1.21
 
 commands:
   livesgui:
-    description: Öffnet die Life GUI
-    usage: /livesgui
-
+    description: Open Lives GUI
+  language:
+    description: Change language
   mode:
-    description: Setzt den Spielmodus (HARDCORE / LIFESTEAL)
-    usage: /mode <HARDCORE|LIFESTEAL>
-  language::
-    descripton: änder die sprache des plugins
-    usage: /language <de|en>
+    description: Change mode
 
 permissions:
   lifeplugin.admin:
