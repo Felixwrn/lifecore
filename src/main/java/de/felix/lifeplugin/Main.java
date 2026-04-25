@@ -2,6 +2,8 @@ package de.felix.lifeplugin;
 
 import de.felix.lifeplugin.gui.LifeGUI;
 import de.felix.lifeplugin.lang.LanguageManager;
+import de.felix.lifeplugin.storage.FileStorage;
+import de.felix.lifeplugin.storage.Storage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,6 +26,8 @@ public class Main extends JavaPlugin implements Listener {
     private LanguageManager languageManager;
     private final HashMap<UUID, Integer> lives = new HashMap<>();
 
+    private Storage storage; // 🔥 STORAGE
+
     private String mode = "LIFESTEAL";
 
     @Override
@@ -33,25 +37,26 @@ public class Main extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
 
+        // 🌍 Language
         languageManager = new LanguageManager();
         languageManager.load(new File(getDataFolder(), "lang"));
+
+        // 💾 Storage aktivieren
+        storage = new FileStorage(getDataFolder());
 
         getServer().getPluginManager().registerEvents(this, this);
 
         getLogger().info("LifePlugin enabled!");
     }
 
-    // 📌 INSTANCE
     public static Main getInstance() {
         return instance;
     }
 
-    // 📌 LANGUAGE FIX (WICHTIG FÜR GUI)
     public LanguageManager getLanguageManager() {
         return languageManager;
     }
 
-    // 📌 LIVES
     public int getLives(UUID uuid) {
         return lives.getOrDefault(uuid, 10);
     }
@@ -60,22 +65,20 @@ public class Main extends JavaPlugin implements Listener {
         this.mode = mode;
     }
 
-    public String getMode() {
-        return mode;
-    }
-
-    // 🧍 JOIN
+    // 🧍 JOIN → lädt aus Speicher
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
         Player p = e.getPlayer();
 
-        lives.putIfAbsent(p.getUniqueId(), 10);
+        int saved = storage.getLives(p.getUniqueId());
+
+        lives.put(p.getUniqueId(), saved);
 
         updateActionBar(p);
     }
 
-    // 💀 DEATH
+    // 💀 DEATH → speichert
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
@@ -84,6 +87,9 @@ public class Main extends JavaPlugin implements Listener {
         int current = getLives(p.getUniqueId()) - 1;
 
         lives.put(p.getUniqueId(), current);
+
+        storage.setLives(p.getUniqueId(), current);
+        storage.save(p.getUniqueId());
 
         if (current <= 0) {
 
@@ -100,12 +106,15 @@ public class Main extends JavaPlugin implements Listener {
 
         Player killer = p.getKiller();
 
-        // 🧛 LIFESTEAL
+        // 🧛 Lifesteal
         if (killer != null && mode.equalsIgnoreCase("LIFESTEAL")) {
 
-            int killerLives = getLives(killer.getUniqueId());
+            int killerLives = getLives(killer.getUniqueId()) + 1;
 
-            lives.put(killer.getUniqueId(), killerLives + 1);
+            lives.put(killer.getUniqueId(), killerLives);
+
+            storage.setLives(killer.getUniqueId(), killerLives);
+            storage.save(killer.getUniqueId());
 
             killer.sendMessage("§a+1 Life");
         }
@@ -113,7 +122,7 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
 
-    // 📊 ACTIONBAR
+    // 📊 ActionBar
     private void updateActionBar(Player p) {
 
         int l = getLives(p.getUniqueId());
@@ -127,7 +136,7 @@ public class Main extends JavaPlugin implements Listener {
         p.sendActionBar(msg);
     }
 
-    // 🚫 GUI CLICK PROTECTION
+    // 🚫 GUI Protection
     @EventHandler
     public void onInvClick(InventoryClickEvent e) {
 
@@ -136,7 +145,6 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    // 🚫 GUI DRAG PROTECTION
     @EventHandler
     public void onInvDrag(InventoryDragEvent e) {
 
@@ -145,13 +153,13 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    // ⌨ COMMANDS
+    // ⌨ Commands
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (!(sender instanceof Player p)) return true;
 
-        // 🌍 LANGUAGE
+        // 🌍 Language
         if (cmd.getName().equalsIgnoreCase("language")) {
 
             if (args.length == 0) {
@@ -165,7 +173,7 @@ public class Main extends JavaPlugin implements Listener {
             return true;
         }
 
-        // ⚙ MODE
+        // ⚙ Mode
         if (cmd.getName().equalsIgnoreCase("mode")) {
 
             if (!p.isOp()) return true;
