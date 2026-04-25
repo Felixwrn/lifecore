@@ -46,6 +46,7 @@ A modern, lightweight and highly customizable **Minecraft 1.21.x life system plu
 | `/livesgui` | Opens the life GUI |
 | `/mode hardcore / lifesteal`  | Changes game mode (admin only) |
 | `/language download <es/it/fr>` | download the language | 
+| `/langgui` | opens Language GUI |
 
 ---
 
