@@ -1,4 +1,4 @@
-package de.felix.lifecore.lang;
+package de.felix.lifeplugin.lang;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
