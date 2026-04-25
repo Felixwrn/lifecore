@@ -9,47 +9,38 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
-import java.util.UUID;
 
 public class LifeGUI {
 
-    // 📌 GUI TITLE
-    public static String getTitle(Player p) {
-        return Main.getInstance()
-                .getLanguageManager()
-                .get(p.getUniqueId(), "gui_title");
+    private static final String TITLE = "§cDein Leben Menü";
+
+    public static String getTitle() {
+        return TITLE;
     }
 
-    // 📌 OPEN GUI
     public static void open(Player p) {
 
-        UUID uuid = p.getUniqueId();
+        Inventory inv = Bukkit.createInventory(null, 27, TITLE);
 
-        Inventory inv = Bukkit.createInventory(
-                null,
-                27,
-                getTitle(p)
-        );
-
-        int lives = Main.getInstance().getLives(uuid);
+        int lives = Main.getInstance().getLives(p.getUniqueId());
 
         ItemStack heart = new ItemStack(Material.RED_DYE);
         ItemMeta meta = heart.getItemMeta();
 
         if (meta == null) return;
 
-        // 🧠 Title inside item
+        // 🌍 Name aus LanguageSystem
         meta.setDisplayName(
                 Main.getInstance()
                         .getLanguageManager()
-                        .get(uuid, "gui_lives_title")
+                        .get(p.getUniqueId(), "gui_lives_title")
         );
 
-        // 📜 Lore
+        // 🌍 Lore aus LanguageSystem
         meta.setLore(List.of(
                 Main.getInstance()
                         .getLanguageManager()
-                        .get(uuid, "gui_current"),
+                        .get(p.getUniqueId(), "gui_current"),
                 "§a" + lives
         ));
 
