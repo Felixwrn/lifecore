@@ -44,7 +44,7 @@ A modern, lightweight and highly customizable **Minecraft 1.21.x life system plu
 | Command | Description |
 |--------|-------------|
 | `/livesgui` | Opens the life GUI |
-| `/mode <HARDCORE|LIFESTEAL>` | Changes game mode (admin only) |
+| `/mode`  | Changes game mode (admin only) |
 
 ---
 
