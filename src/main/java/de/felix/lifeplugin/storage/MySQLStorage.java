@@ -7,7 +7,7 @@ public class MySQLStorage implements Storage {
 
     private Connection connection;
 
-    public MySQL(String host, int port, String db, String user, String pass) {
+    public MySQLStorage(String host, int port, String db, String user, String pass) {
         try {
             connection = DriverManager.getConnection(
                     "jdbc:mysql://" + host + ":" + port + "/" + db,
