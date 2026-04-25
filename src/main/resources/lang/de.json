@@ -5,7 +5,7 @@
 
   "no_lives": "§cDu hast keine Leben mehr!",
 
-  "gui_title": "§cDein Leben Menü",
+  "gui_life_title": "§cDein Leben Menü",
   "gui_life_title": "§cLeben",
   "gui_current": "Aktuell:",
 
