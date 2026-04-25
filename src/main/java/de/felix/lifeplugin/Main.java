@@ -40,6 +40,9 @@ public class Main extends JavaPlugin implements Listener {
         saveDefaultConfig();
         loadLangConfig();
 
+        // 🔥 Default Languages (de + en)
+        copyDefaultLanguages();
+
         languageManager = new LanguageManager();
         languageManager.load(new File(getDataFolder(), "lang"));
 
@@ -73,6 +76,27 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         langConfig = YamlConfiguration.loadConfiguration(langConfigFile);
+    }
+
+    // 🔥 Kopiert de + en automatisch
+    private void copyDefaultLanguages() {
+
+        File langFolder = new File(getDataFolder(), "lang");
+
+        if (!langFolder.exists()) {
+            langFolder.mkdirs();
+        }
+
+        String[] defaults = {"de.json", "en.json"};
+
+        for (String file : defaults) {
+
+            File target = new File(langFolder, file);
+
+            if (!target.exists()) {
+                saveResource("lang/" + file, false);
+            }
+        }
     }
 
     public static Main getInstance() {
@@ -139,7 +163,7 @@ public class Main extends JavaPlugin implements Listener {
         p.sendActionBar(msg);
     }
 
-    // GUI BLOCK
+    // GUI Block
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getView().getTitle().equals(LifeGUI.getTitle())) e.setCancelled(true);
@@ -156,14 +180,25 @@ public class Main extends JavaPlugin implements Listener {
 
         if (!(sender instanceof Player p)) return true;
 
-        // LANGUAGE DOWNLOAD
+        // LANGUAGE
         if (cmd.getName().equalsIgnoreCase("language")) {
 
+            // Download
             if (args.length == 2 && args[0].equalsIgnoreCase("download")) {
-                downloadLanguage(args[1], p);
+
+                String lang = args[1].toLowerCase();
+
+                // ❌ block default languages
+                if (lang.equals("de") || lang.equals("en")) {
+                    p.sendMessage("§cThis language is already installed!");
+                    return true;
+                }
+
+                downloadLanguage(lang, p);
                 return true;
             }
 
+            // Set
             if (args.length == 1) {
                 languageManager.setLanguage(p.getUniqueId(), args[0]);
                 p.sendMessage("§aLanguage set to " + args[0]);
@@ -203,7 +238,7 @@ public class Main extends JavaPlugin implements Listener {
         return false;
     }
 
-    // DOWNLOAD
+    // DOWNLOAD SYSTEM
     private void downloadLanguage(String lang, Player p) {
 
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
