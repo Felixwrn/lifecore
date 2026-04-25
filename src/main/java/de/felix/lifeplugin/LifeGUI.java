@@ -7,7 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.UUID;
+import java.util.List;
 
 public class LifeGUI {
 
@@ -17,33 +17,18 @@ public class LifeGUI {
 
         int lives = Main.getInstance().getLives(p.getUniqueId());
 
-        // ❤️ Anzeige Item
         ItemStack heart = new ItemStack(Material.RED_DYE);
         ItemMeta meta = heart.getItemMeta();
 
         meta.setDisplayName("§cLeben");
-        meta.setLore(java.util.List.of(
-                "§7Du hast aktuell:",
-                "§a" + lives + " §7Leben"
+        meta.setLore(List.of(
+                "§7Aktuell:",
+                "§a" + lives
         ));
 
         heart.setItemMeta(meta);
 
         inv.setItem(13, heart);
-
-        // Info Item
-        ItemStack info = new ItemStack(Material.BOOK);
-        ItemMeta meta2 = info.getItemMeta();
-
-        meta2.setDisplayName("§eInfo");
-        meta2.setLore(java.util.List.of(
-                "§7Bei 0 Leben wirst du gekickt",
-                "§7Sterben reduziert Leben"
-        ));
-
-        info.setItemMeta(meta2);
-
-        inv.setItem(11, info);
 
         p.openInventory(inv);
     }
