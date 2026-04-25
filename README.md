@@ -1,4 +1,4 @@
-# ❤️ LifePlugin
+# ❤️ Lifecore
 
 A modern, lightweight and highly customizable **Minecraft 1.21.x life system plugin** featuring Hardcore & Lifesteal gameplay modes, MySQL support, GUI interfaces, and a JSON-based multi-language system.
 
