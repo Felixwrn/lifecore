@@ -1,4 +1,16 @@
 {
   "death": "§cDu bist gestorben",
-  "lives": "§cLeben: §f%lives%"
+
+  "lives": "§cLeben: §f%lives%",
+
+  "no_lives": "§cDu hast keine Leben mehr!",
+
+  "gui_title": "§cDein Leben Menü",
+  "gui_lives_title": "§cLeben",
+  "gui_current": "Aktuell:",
+
+  "mode_set_hardcore": "§aMode gesetzt: HARDCORE",
+  "mode_set_lifesteal": "§aMode gesetzt: LIFESTEAL",
+
+  "language_set": "§aSprache geändert"
 }
