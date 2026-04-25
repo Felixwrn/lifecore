@@ -46,6 +46,11 @@ public class Main extends JavaPlugin implements Listener {
         return instance;
     }
 
+    // 📌 LANGUAGE FIX (WICHTIG FÜR GUI)
+    public LanguageManager getLanguageManager() {
+        return languageManager;
+    }
+
     // 📌 LIVES
     public int getLives(UUID uuid) {
         return lives.getOrDefault(uuid, 10);
@@ -108,7 +113,7 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
 
-    // 📊 ACTIONBAR (HIER IST DEIN FIX)
+    // 📊 ACTIONBAR
     private void updateActionBar(Player p) {
 
         int l = getLives(p.getUniqueId());
@@ -155,7 +160,6 @@ public class Main extends JavaPlugin implements Listener {
             }
 
             languageManager.setLanguage(p.getUniqueId(), args[0]);
-
             p.sendMessage("§aLanguage set to " + args[0]);
 
             return true;
