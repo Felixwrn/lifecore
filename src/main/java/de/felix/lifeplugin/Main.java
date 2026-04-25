@@ -45,7 +45,7 @@ public class Main extends JavaPlugin implements Listener {
         return instance;
     }
 
-    // 📦 Lives Getter
+    // 📦 LIVES
     public int getLives(UUID uuid) {
         return lives.getOrDefault(uuid, 10);
     }
@@ -54,7 +54,11 @@ public class Main extends JavaPlugin implements Listener {
         this.mode = newMode;
     }
 
-    // 🧍 Join
+    public String getMode() {
+        return mode;
+    }
+
+    // 🧍 JOIN
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
@@ -65,7 +69,7 @@ public class Main extends JavaPlugin implements Listener {
         updateActionBar(p);
     }
 
-    // 💀 Death
+    // 💀 DEATH
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
@@ -90,6 +94,7 @@ public class Main extends JavaPlugin implements Listener {
 
         Player killer = p.getKiller();
 
+        // 🧛 LIFESTEAL
         if (killer != null && mode.equalsIgnoreCase("LIFESTEAL")) {
 
             int killerLives = getLives(killer.getUniqueId());
@@ -102,7 +107,7 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
 
-    // 📊 ActionBar
+    // 📊 ACTIONBAR
     private void updateActionBar(Player p) {
 
         int l = getLives(p.getUniqueId());
@@ -134,44 +139,52 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    // ⌨ Commands
+    // ⌨ COMMANDS
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (!(sender instanceof Player p)) return true;
 
-        // 🌍 Language
+        // 🌍 LANGUAGE
         if (cmd.getName().equalsIgnoreCase("language")) {
 
             if (args.length == 0) {
-                p.sendMessage("§cUse /language <de|en>");
+                p.sendMessage("§cUse: /language <de|en>");
                 return true;
             }
 
             languageManager.setLanguage(p.getUniqueId(), args[0]);
-
             p.sendMessage("§aLanguage set to " + args[0]);
 
             return true;
         }
 
-        // ⚙ Mode
+        // ⚙ MODE (nur hardcore / lifesteal)
         if (cmd.getName().equalsIgnoreCase("mode")) {
 
             if (!p.isOp()) return true;
 
-            if (args.length == 0) return true;
-
-            String input = args[0].toUpperCase();
-
-            if (!input.equals("LIFESTEAL") && !input.equals("HARDCORE")) {
-                p.sendMessage("§cUse LIFESTEAL or HARDCORE");
+            if (args.length == 0) {
+                p.sendMessage("§cUse: /mode <hardcore|lifesteal>");
                 return true;
             }
 
-            mode = input;
+            String input = args[0].toLowerCase();
 
-            p.sendMessage("§aMode set to " + mode);
+            if (input.equals("hardcore")) {
+
+                mode = "HARDCORE";
+                p.sendMessage("§aMode set to HARDCORE");
+
+            } else if (input.equals("lifesteal")) {
+
+                mode = "LIFESTEAL";
+                p.sendMessage("§aMode set to LIFESTEAL");
+
+            } else {
+
+                p.sendMessage("§cOnly: hardcore or lifesteal allowed!");
+            }
 
             return true;
         }
@@ -180,7 +193,6 @@ public class Main extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
 
             LifeGUI.open(p);
-
             return true;
         }
 
