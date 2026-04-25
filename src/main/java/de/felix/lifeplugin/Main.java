@@ -15,36 +15,58 @@ import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
 
-    private final HashMap<UUID, Integer> lives = new HashMap<>();
-
     private static Main instance;
+
+    private Storage storage;
 
     private GameModeType mode;
 
     @Override
     public void onEnable() {
+
         instance = this;
 
         saveDefaultConfig();
 
+        // 🔧 Mode laden
         String m = getConfig().getString("mode", "LIFESTEAL");
         mode = GameModeType.valueOf(m.toUpperCase());
 
+        // 🗄️ Storage laden
+        String type = getConfig().getString("storage.type", "FILE");
+
+        if (type.equalsIgnoreCase("MYSQL")) {
+
+            MySQL mysql = new MySQL();
+
+            storage = new MySQLStorage(
+                    mysql.connect(
+                            getConfig().getString("mysql.host"),
+                            getConfig().getString("mysql.database"),
+                            getConfig().getString("mysql.user"),
+                            getConfig().getString("mysql.password")
+                    )
+            );
+
+        } else {
+            storage = new FileStorage(this);
+        }
+
         Bukkit.getPluginManager().registerEvents(this, this);
 
-        getLogger().info("LifePlugin gestartet! Mode: " + mode);
+        getLogger().info("LifePlugin gestartet | Mode: " + mode);
     }
 
     public static Main getInstance() {
         return instance;
     }
 
-    public int getLives(UUID uuid) {
-        return lives.getOrDefault(uuid, getConfig().getInt("start-lives", 10));
-    }
-
     public GameModeType getMode() {
         return mode;
+    }
+
+    public int getLives(UUID uuid) {
+        return storage.getLives(uuid);
     }
 
     // 🧍 Join
@@ -53,25 +75,27 @@ public class Main extends JavaPlugin implements Listener {
 
         Player p = e.getPlayer();
 
-        lives.putIfAbsent(p.getUniqueId(), getConfig().getInt("start-lives", 10));
+        storage.loadPlayer(p.getUniqueId());
 
         updateActionBar(p);
     }
 
-    // 💀 Death
+    // 💀 Death System
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
         Player p = e.getEntity();
 
+        // 🧛 Lifesteal
         if (mode == GameModeType.LIFESTEAL) {
             handleLifeSteal(p, e.getEntity().getKiller());
         }
 
-        int current = lives.getOrDefault(p.getUniqueId(), 10);
-        current--;
+        int lives = storage.getLives(p.getUniqueId()) - 1;
 
-        if (current <= 0) {
+        storage.savePlayer(p.getUniqueId(), lives);
+
+        if (lives <= 0) {
 
             if (mode == GameModeType.HARDCORE) {
                 p.kickPlayer("§cHardcore: keine Leben mehr!");
@@ -79,11 +103,8 @@ public class Main extends JavaPlugin implements Listener {
                 p.sendMessage("§cDu hast keine Leben mehr!");
             }
 
-            lives.remove(p.getUniqueId());
             return;
         }
-
-        lives.put(p.getUniqueId(), current);
 
         Bukkit.getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
@@ -96,15 +117,13 @@ public class Main extends JavaPlugin implements Listener {
         int steal = getConfig().getInt("lifesteal.steal-amount", 1);
         int max = getConfig().getInt("lifesteal.max-lives", 20);
 
-        UUID uuid = killer.getUniqueId();
-
-        int current = lives.getOrDefault(uuid, 10);
+        int current = storage.getLives(killer.getUniqueId());
 
         if (current >= max) return;
 
         current += steal;
 
-        lives.put(uuid, current);
+        storage.savePlayer(killer.getUniqueId(), current);
 
         killer.sendMessage("§a+1 Leben durch Kill!");
     }
@@ -112,9 +131,9 @@ public class Main extends JavaPlugin implements Listener {
     // 📊 ActionBar
     private void updateActionBar(Player p) {
 
-        int current = getLives(p.getUniqueId());
+        int lives = storage.getLives(p.getUniqueId());
 
-        ActionBarUtil.send(p, "§cLeben: §f" + current + " §7| Mode: " + mode);
+        ActionBarUtil.send(p, "§cLeben: §f" + lives + " §7| Mode: " + mode);
     }
 
     // ⌨️ Commands
@@ -123,11 +142,14 @@ public class Main extends JavaPlugin implements Listener {
 
         if (!(sender instanceof Player p)) return true;
 
+        // GUI öffnen
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
+
             LifeGUI.open(p);
             return true;
         }
 
+        // Mode ändern
         if (cmd.getName().equalsIgnoreCase("mode")) {
 
             if (!p.isOp()) return true;
@@ -136,11 +158,22 @@ public class Main extends JavaPlugin implements Listener {
 
             mode = GameModeType.valueOf(args[0].toUpperCase());
 
+            getConfig().set("mode", mode.toString());
+            saveConfig();
+
             p.sendMessage("§aMode gesetzt: " + mode);
 
             return true;
         }
 
         return false;
+    }
+
+    @Override
+    public void onDisable() {
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            storage.savePlayer(p.getUniqueId(), storage.getLives(p.getUniqueId()));
+        }
     }
 }
