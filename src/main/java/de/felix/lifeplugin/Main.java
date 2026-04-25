@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -15,16 +16,23 @@ import java.util.UUID;
 public class Main extends JavaPlugin implements Listener {
 
     private final HashMap<UUID, Integer> lives = new HashMap<>();
+    private static Main instance;
 
     @Override
     public void onEnable() {
+        instance = this;
         Bukkit.getPluginManager().registerEvents(this, this);
         getLogger().info("LifePlugin gestartet!");
     }
 
-    // Spieler bekommt beim Join 10 Leben
-    @Override
-    public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
+    public static Main getInstance() {
+        return instance;
+    }
+
+    // 🧍 Join Event
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+
         Player p = event.getPlayer();
 
         lives.putIfAbsent(p.getUniqueId(), 10);
@@ -32,7 +40,7 @@ public class Main extends JavaPlugin implements Listener {
         updateActionBar(p);
     }
 
-    // Wenn Spieler stirbt → Leben verlieren
+    // 💀 Death Event
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
 
@@ -49,31 +57,27 @@ public class Main extends JavaPlugin implements Listener {
 
         lives.put(p.getUniqueId(), current);
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            updateActionBar(p);
-        }, 10L);
+        Bukkit.getScheduler().runTaskLater(this, () -> updateActionBar(p), 10L);
     }
 
-    // ActionBar System (FIXED)
+    // 📊 ActionBar
     private void updateActionBar(Player p) {
+
         int current = lives.getOrDefault(p.getUniqueId(), 10);
 
         ActionBarUtil.send(p, "§cLeben: §f" + current);
     }
 
-    // Command zum testen
+    // ⌨️ Commands
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (!(sender instanceof Player p)) return true;
 
-       if (cmd.getName().equalsIgnoreCase("livesgui")) {
+        if (cmd.getName().equalsIgnoreCase("livesgui")) {
 
-    if (!(sender instanceof Player p)) return true;
-
-    LifeGUI.open(p);
-
-    return true;
+            LifeGUI.open(p);
+            return true;
         }
 
         return false;
