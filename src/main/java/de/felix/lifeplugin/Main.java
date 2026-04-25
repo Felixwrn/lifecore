@@ -7,10 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
@@ -18,7 +18,6 @@ public class Main extends JavaPlugin implements Listener {
     private static Main instance;
 
     private Storage storage;
-
     private GameModeType mode;
 
     @Override
@@ -28,11 +27,11 @@ public class Main extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
 
-        // 🔧 Mode laden
+        // 🎮 Mode laden
         String m = getConfig().getString("mode", "LIFESTEAL");
         mode = GameModeType.valueOf(m.toUpperCase());
 
-        // 🗄️ Storage laden
+        // 💾 Storage laden
         String type = getConfig().getString("storage.type", "FILE");
 
         if (type.equalsIgnoreCase("MYSQL")) {
@@ -80,7 +79,7 @@ public class Main extends JavaPlugin implements Listener {
         updateActionBar(p);
     }
 
-    // 💀 Death System
+    // 💀 Death
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
@@ -136,20 +135,26 @@ public class Main extends JavaPlugin implements Listener {
         ActionBarUtil.send(p, "§cLeben: §f" + lives + " §7| Mode: " + mode);
     }
 
+    // 🚫 GUI Schutz (kein Item rausnehmen)
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+
+        if (e.getView().getTitle().equals("§cDeine Leben")) {
+            e.setCancelled(true);
+        }
+    }
+
     // ⌨️ Commands
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (!(sender instanceof Player p)) return true;
 
-        // GUI öffnen
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
-
             LifeGUI.open(p);
             return true;
         }
 
-        // Mode ändern
         if (cmd.getName().equalsIgnoreCase("mode")) {
 
             if (!p.isOp()) return true;
