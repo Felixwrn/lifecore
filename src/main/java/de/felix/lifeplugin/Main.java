@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -49,6 +50,10 @@ public class Main extends JavaPlugin implements Listener {
         return lives.getOrDefault(uuid, 10);
     }
 
+    public void setMode(String newMode) {
+        this.mode = newMode;
+    }
+
     // 🧍 Join
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
@@ -60,7 +65,7 @@ public class Main extends JavaPlugin implements Listener {
         updateActionBar(p);
     }
 
-    // 💀 Death System
+    // 💀 Death
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
 
@@ -85,7 +90,6 @@ public class Main extends JavaPlugin implements Listener {
 
         Player killer = p.getKiller();
 
-        // 🧛 Lifesteal
         if (killer != null && mode.equalsIgnoreCase("LIFESTEAL")) {
 
             int killerLives = getLives(killer.getUniqueId());
@@ -112,11 +116,20 @@ public class Main extends JavaPlugin implements Listener {
         p.sendActionBar(msg);
     }
 
-    // 🚫 GUI Protection
+    // 🚫 GUI CLICK PROTECTION
     @EventHandler
     public void onInvClick(InventoryClickEvent e) {
 
-        if (e.getView().getTitle().equals("§cLifeCore GUI")) {
+        if (e.getView().getTitle().equals(LifeGUI.getTitle())) {
+            e.setCancelled(true);
+        }
+    }
+
+    // 🚫 GUI DRAG PROTECTION
+    @EventHandler
+    public void onInvDrag(InventoryDragEvent e) {
+
+        if (e.getView().getTitle().equals(LifeGUI.getTitle())) {
             e.setCancelled(true);
         }
     }
@@ -149,14 +162,21 @@ public class Main extends JavaPlugin implements Listener {
 
             if (args.length == 0) return true;
 
-            mode = args[0].toUpperCase();
+            String input = args[0].toUpperCase();
+
+            if (!input.equals("LIFESTEAL") && !input.equals("HARDCORE")) {
+                p.sendMessage("§cUse LIFESTEAL or HARDCORE");
+                return true;
+            }
+
+            mode = input;
 
             p.sendMessage("§aMode set to " + mode);
 
             return true;
         }
 
-        // 📦 Lives GUI
+        // 📦 GUI
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
 
             LifeGUI.open(p);
