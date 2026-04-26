@@ -189,12 +189,12 @@ public class Main extends JavaPlugin implements Listener, TabExecutor {
 
             String name = e.getCurrentItem().getItemMeta().getDisplayName();
 
-            if (name.contains("Next") || name.contains("Weiter") || name.contains("Suivant")) {
+            if (name.contains("Next") || name.contains("Weiter")) {
                 LanguageGUI.open(p, LanguageGUI.getPage(p.getUniqueId()) + 1);
                 return;
             }
 
-            if (name.contains("Previous") || name.contains("Zurück") || name.contains("Retour")) {
+            if (name.contains("Previous") || name.contains("Zurück")) {
                 LanguageGUI.open(p, LanguageGUI.getPage(p.getUniqueId()) - 1);
                 return;
             }
@@ -250,17 +250,9 @@ public class Main extends JavaPlugin implements Listener, TabExecutor {
 
         if (!(e.getWhoClicked() instanceof Player p)) return;
 
-        if (e.getView().getTitle().equals(LifeGUI.getTitle(p))) {
-            e.setCancelled(true);
-        }
-
-        if (e.getView().getTitle().equals(LanguageGUI.getTitle(p))) {
-            e.setCancelled(true);
-        }
-
-        if (e.getView().getTitle().equals(ModeGUI.getTitle(p))) {
-            e.setCancelled(true);
-        }
+        if (e.getView().getTitle().equals(LifeGUI.getTitle(p))) e.setCancelled(true);
+        if (e.getView().getTitle().equals(LanguageGUI.getTitle(p))) e.setCancelled(true);
+        if (e.getView().getTitle().equals(ModeGUI.getTitle(p))) e.setCancelled(true);
     }
 
     // COMMANDS
@@ -269,55 +261,81 @@ public class Main extends JavaPlugin implements Listener, TabExecutor {
 
         if (!(sender instanceof Player p)) return true;
 
-        if (cmd.getName().equalsIgnoreCase("language")) {
+        // ADMIN LIFE COMMAND
+        if (cmd.getName().equalsIgnoreCase("life")) {
 
-            if (args.length == 2 && args[0].equalsIgnoreCase("download")) {
-
-                String lang = args[1].toLowerCase();
-
-                if (lang.equals("de") || lang.equals("en")) {
-                    p.sendMessage("§cAlready installed!");
-                    return true;
-                }
-
-                downloadLanguage(lang, p);
-                return true;
-            }
-
-            if (args.length == 1) {
-                languageManager.setLanguage(p.getUniqueId(), args[0]);
-                p.sendMessage("§aLanguage set to " + args[0]);
-                return true;
-            }
-        }
-
-        if (cmd.getName().equalsIgnoreCase("mode")) {
-
-            if (!p.hasPermission("lifecore.mode")) {
+            if (!p.hasPermission("lifecore.admin")) {
                 p.sendMessage("§cNo permission!");
                 return true;
             }
 
-            if (args.length == 0) {
-                ModeGUI.open(p);
+            if (args.length < 2) {
+                p.sendMessage("§cUsage: /life <give/set/remove/reset> <player> [amount]");
                 return true;
             }
 
-            String input = args[0].toLowerCase();
+            Player target = Bukkit.getPlayer(args[1]);
 
-            if (input.equals("hardcore")) {
-                mode = "HARDCORE";
-            } else if (input.equals("lifesteal")) {
-                mode = "LIFESTEAL";
-            } else {
-                p.sendMessage("§cOnly hardcore or lifesteal allowed!");
+            if (target == null) {
+                p.sendMessage("§cPlayer not found!");
                 return true;
             }
 
-            getConfig().set("mode", mode);
-            saveConfig();
+            UUID uuid = target.getUniqueId();
+            int current = getLives(uuid);
 
-            p.sendMessage("§aMode set to " + mode);
+            int amount = 0;
+            if (args.length >= 3) {
+                try {
+                    amount = Integer.parseInt(args[2]);
+                } catch (Exception e) {
+                    p.sendMessage("§cInvalid number!");
+                    return true;
+                }
+            }
+
+            switch (args[0].toLowerCase()) {
+
+                case "give" -> {
+                    int newLives = current + amount;
+                    lives.put(uuid, newLives);
+                    storage.setLives(uuid, newLives);
+                    storage.save(uuid);
+                    p.sendMessage("§aGave " + amount + " lives to " + target.getName());
+                }
+
+                case "set" -> {
+                    lives.put(uuid, amount);
+                    storage.setLives(uuid, amount);
+                    storage.save(uuid);
+                    p.sendMessage("§aSet lives of " + target.getName() + " to " + amount);
+                }
+
+                case "remove" -> {
+                    int newLives = Math.max(0, current - amount);
+                    lives.put(uuid, newLives);
+                    storage.setLives(uuid, newLives);
+                    storage.save(uuid);
+                    p.sendMessage("§cRemoved " + amount + " lives from " + target.getName());
+                }
+
+                case "reset" -> {
+                    int start = getConfig().getInt("start-lives", 10);
+                    lives.put(uuid, start);
+                    storage.setLives(uuid, start);
+                    storage.save(uuid);
+                    p.sendMessage("§eReset lives of " + target.getName());
+                }
+
+                default -> p.sendMessage("§cUnknown subcommand!");
+            }
+
+            return true;
+        }
+
+        // MODE COMMAND
+        if (cmd.getName().equalsIgnoreCase("mode")) {
+            ModeGUI.open(p);
             return true;
         }
 
