@@ -2,6 +2,7 @@ package de.felix.lifeplugin;
 
 import de.felix.lifeplugin.gui.LanguageGUI;
 import de.felix.lifeplugin.gui.LifeGUI;
+import de.felix.lifeplugin.gui.ModeGUI;
 import de.felix.lifeplugin.lang.LanguageManager;
 import de.felix.lifeplugin.storage.*;
 import org.bukkit.command.*;
@@ -12,6 +13,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.Material;
 
 import java.io.*;
 import java.net.URL;
@@ -19,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
-public class Main extends JavaPlugin implements Listener {
+public class Main extends JavaPlugin implements Listener, TabExecutor {
 
     private static Main instance;
 
@@ -40,7 +42,6 @@ public class Main extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
         loadLangConfig();
-
         copyDefaultLanguages();
 
         languageManager = new LanguageManager();
@@ -64,6 +65,9 @@ public class Main extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents(this, this);
 
+        getCommand("mode").setExecutor(this);
+        getCommand("mode").setTabCompleter(this);
+
         getLogger().info("LifePlugin enabled!");
     }
 
@@ -78,7 +82,6 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     private void copyDefaultLanguages() {
-
         File langFolder = new File(getDataFolder(), "lang");
 
         if (!langFolder.exists()) {
@@ -163,7 +166,7 @@ public class Main extends JavaPlugin implements Listener {
         p.sendActionBar(msg);
     }
 
-    // GUI BLOCK
+    // GUI EVENTS
     @EventHandler
     public void onClick(InventoryClickEvent e) {
 
@@ -195,6 +198,30 @@ public class Main extends JavaPlugin implements Listener {
 
             p.closeInventory();
         }
+
+        // ModeGUI
+        if (e.getView().getTitle().equals(ModeGUI.getTitle())) {
+
+            e.setCancelled(true);
+
+            if (e.getCurrentItem() == null) return;
+
+            Material mat = e.getCurrentItem().getType();
+
+            if (mat == Material.REDSTONE) {
+                mode = "HARDCORE";
+            } else if (mat == Material.HEART_OF_THE_SEA) {
+                mode = "LIFESTEAL";
+            } else {
+                return;
+            }
+
+            getConfig().set("mode", mode);
+            saveConfig();
+
+            p.sendMessage("§aMode set to " + mode);
+            p.closeInventory();
+        }
     }
 
     @EventHandler
@@ -207,6 +234,10 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         if (e.getView().getTitle().equals(LanguageGUI.getTitle())) {
+            e.setCancelled(true);
+        }
+
+        if (e.getView().getTitle().equals(ModeGUI.getTitle())) {
             e.setCancelled(true);
         }
     }
@@ -238,6 +269,37 @@ public class Main extends JavaPlugin implements Listener {
                 p.sendMessage("§aLanguage set to " + args[0]);
                 return true;
             }
+        }
+
+        // MODE
+        if (cmd.getName().equalsIgnoreCase("mode")) {
+
+            if (!p.hasPermission("lifecore.mode")) {
+                p.sendMessage("§cNo permission!");
+                return true;
+            }
+
+            if (args.length == 0) {
+                ModeGUI.open(p);
+                return true;
+            }
+
+            String input = args[0].toLowerCase();
+
+            if (input.equals("hardcore")) {
+                mode = "HARDCORE";
+            } else if (input.equals("lifesteal")) {
+                mode = "LIFESTEAL";
+            } else {
+                p.sendMessage("§cOnly hardcore or lifesteal allowed!");
+                return true;
+            }
+
+            getConfig().set("mode", mode);
+            saveConfig();
+
+            p.sendMessage("§aMode set to " + mode);
+            return true;
         }
 
         // RELOAD
@@ -275,6 +337,19 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         return false;
+    }
+
+    // TAB COMPLETION
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+
+        if (cmd.getName().equalsIgnoreCase("mode")) {
+            if (args.length == 1) {
+                return List.of("hardcore", "lifesteal");
+            }
+        }
+
+        return null;
     }
 
     // DOWNLOAD
