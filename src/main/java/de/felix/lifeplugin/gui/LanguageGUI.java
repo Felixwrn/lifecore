@@ -13,13 +13,12 @@ import java.util.*;
 
 public class LanguageGUI {
 
-    private static final String TITLE = "§6§lLanguage Selection";
-
     private static final Map<UUID, Integer> pages = new HashMap<>();
     private static final int ITEMS_PER_PAGE = 21;
 
-    public static String getTitle() {
-        return TITLE;
+    public static String getTitle(Player p) {
+        return Main.getInstance().getLanguageManager()
+                .get(p.getUniqueId(), "langgui_title");
     }
 
     public static void open(Player p) {
@@ -30,13 +29,14 @@ public class LanguageGUI {
 
         pages.put(p.getUniqueId(), page);
 
-        Inventory inv = Bukkit.createInventory(null, 45, TITLE);
+        var lm = Main.getInstance().getLanguageManager();
+        var uuid = p.getUniqueId();
 
-        String current = Main.getInstance()
-                .getLanguageManager()
-                .getLanguage(p.getUniqueId());
+        Inventory inv = Bukkit.createInventory(null, 45, getTitle(p));
 
-        // 🔲 Rahmen
+        String current = lm.getLanguage(uuid);
+
+        // Rahmen
         ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         ItemMeta fMeta = filler.getItemMeta();
         if (fMeta != null) {
@@ -50,27 +50,20 @@ public class LanguageGUI {
             }
         }
 
-        // 📍 Slots
         int[] slots = {
                 10,11,12,13,14,15,16,
                 19,20,21,22,23,24,25,
                 28,29,30,31,32,33,34
         };
 
-        // 🔥 Sprachen vorbereiten (DE & EN fix vorne)
         List<String> all = getAllLanguages();
 
         List<String> sorted = new ArrayList<>();
-
-        // Immer zuerst
         sorted.add("de");
         sorted.add("en");
 
-        // Rest sammeln
         List<String> rest = new ArrayList<>(all);
-        rest.removeIf(lang -> lang.equalsIgnoreCase("de") || lang.equalsIgnoreCase("en"));
-
-        // alphabetisch sortieren
+        rest.removeIf(l -> l.equalsIgnoreCase("de") || l.equalsIgnoreCase("en"));
         rest.sort(String::compareToIgnoreCase);
 
         sorted.addAll(rest);
@@ -95,7 +88,6 @@ public class LanguageGUI {
 
             ItemStack item = new ItemStack(mat);
             ItemMeta meta = item.getItemMeta();
-
             if (meta == null) continue;
 
             meta.setDisplayName(
@@ -112,14 +104,14 @@ public class LanguageGUI {
             meta.setLore(List.of(
                     "§7Status:",
                     isCurrent
-                            ? "§a✔ Selected"
+                            ? lm.get(uuid, "langgui_selected")
                             : installed
-                                ? "§e✔ Installed"
-                                : "§c✖ Not installed",
+                                ? lm.get(uuid, "langgui_installed")
+                                : lm.get(uuid, "langgui_not_installed"),
                     "",
                     installed
-                            ? "§eClick to select"
-                            : "§cClick to download"
+                            ? lm.get(uuid, "langgui_click_select")
+                            : lm.get(uuid, "langgui_click_download")
             ));
 
             item.setItemMeta(meta);
@@ -129,14 +121,12 @@ public class LanguageGUI {
             }
         }
 
-        // ⬅ Back
         if (page > 0) {
-            inv.setItem(36, createButton(Material.ARROW, "§c← Previous"));
+            inv.setItem(36, createButton(Material.ARROW, lm.get(uuid, "langgui_previous")));
         }
 
-        // ➡ Next
         if (end < sorted.size()) {
-            inv.setItem(44, createButton(Material.ARROW, "§aNext →"));
+            inv.setItem(44, createButton(Material.ARROW, lm.get(uuid, "langgui_next")));
         }
 
         p.openInventory(inv);
