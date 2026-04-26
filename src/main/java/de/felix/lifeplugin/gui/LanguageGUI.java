@@ -82,7 +82,7 @@ public class LanguageGUI {
                 meta.setDisplayName("§e" + lang.toUpperCase());
 
                 if (isCurrent) {
-                    meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
 
