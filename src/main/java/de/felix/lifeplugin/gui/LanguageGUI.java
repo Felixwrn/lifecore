@@ -7,14 +7,14 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LanguageGUI {
 
-    private static final String TITLE = "§6Language Selection";
+    private static final String TITLE = "§6§lLanguage Selection";
 
     public static String getTitle() {
         return TITLE;
@@ -28,20 +28,60 @@ public class LanguageGUI {
                 .getLanguageManager()
                 .getLanguage(p.getUniqueId());
 
-        int slot = 0;
+        // 🔲 Rahmen
+        ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta fMeta = filler.getItemMeta();
+        if (fMeta != null) {
+            fMeta.setDisplayName(" ");
+            filler.setItemMeta(fMeta);
+        }
 
-        // 🔥 Default Sprachen (immer da)
-        String[] defaults = {"de", "en"};
+        for (int i = 0; i < 27; i++) {
+            if (i < 9 || i > 17 || i % 9 == 0 || i % 9 == 8) {
+                inv.setItem(i, filler);
+            }
+        }
 
-        for (String lang : defaults) {
+        // 📍 Slots
+        int[] slots = {10,11,12,13,14,15,16};
+        int index = 0;
 
-            ItemStack item = new ItemStack(Material.LIME_DYE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta == null) continue;
+        // 🌍 Flag URLs (Minecraft Heads)
+        Map<String, String> flags = new HashMap<>();
+        flags.put("de", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGRlYzA4Y2Y3YzFiNjY2YmM1NTRkN2Y3MzI1Y2Q4OTBiODc1YjMyZjA0NmU4OTk0ZTM3ZmY0ZmRjY2QifX19");
+        flags.put("en", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWM5OTkxOTk3ODMyY2NhYmU5N2RjMjBlY2QxNDRlZWI2OTg1OTUyM2RjMTRhMTlkMmJhOTQ3NjI5ZTcifX19");
+        flags.put("fr", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzY1MjFhNmFlYjM1NzM3ZDA3YzM3YzI4ZTg0Njk4NjY5YjQ4MzI3NjlhZjljY2JjYzJhZjM2ZmIifX19");
+        flags.put("es", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzM0Njk4ZjI0NTgxZmQzM2Q2NzI4NjQ4YzZlNmQ4NzYyYmY1NzI0ZTY3ZjQ5Mjk5NjZjZjQifX19");
+        flags.put("it", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzA3NTU5Y2U4NjI1MjgxNzYyZjI5NjY5ZTk5Y2M1YjYzODQ1NDgyZmUifX19");
+
+        // 🔧 Methode für Skull
+        for (String lang : getAllLanguages()) {
+
+            boolean installed = new File(
+                    Main.getInstance().getDataFolder(),
+                    "lang/" + lang + ".json"
+            ).exists();
 
             boolean isCurrent = lang.equalsIgnoreCase(current);
 
-            meta.setDisplayName("§e" + lang.toUpperCase());
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta meta = (SkullMeta) head.getItemMeta();
+
+            if (meta == null) continue;
+
+            // Texture setzen (nur wenn vorhanden)
+            if (flags.containsKey(lang)) {
+                meta.setOwnerProfile(Bukkit.createPlayerProfile(UUID.randomUUID()));
+                meta.getOwnerProfile().getTextures().setSkin(
+                        java.net.URI.create("http://textures.minecraft.net/texture/" + flags.get(lang))
+                );
+            }
+
+            meta.setDisplayName(
+                    isCurrent
+                            ? "§6★ §f§l" + lang.toUpperCase()
+                            : "§f§l" + lang.toUpperCase()
+            );
 
             if (isCurrent) {
                 meta.addEnchant(Enchantment.UNBREAKING, 1, true);
@@ -49,56 +89,43 @@ public class LanguageGUI {
             }
 
             meta.setLore(List.of(
+                    "§7Status:",
                     isCurrent
-                            ? "§bCurrently selected"
-                            : "§aInstalled (Click to use)"
+                            ? "§a✔ Selected"
+                            : installed
+                                ? "§e✔ Installed"
+                                : "§c✖ Not installed",
+                    "",
+                    installed
+                            ? "§eClick to select"
+                            : "§cClick to download"
             ));
 
-            item.setItemMeta(meta);
-            inv.setItem(slot++, item);
-        }
+            head.setItemMeta(meta);
 
-        // 🌐 Config Sprachen
-        if (Main.getInstance().getLangConfig().getConfigurationSection("languages") != null) {
-
-            Map<String, Object> langs = Main.getInstance()
-                    .getLangConfig()
-                    .getConfigurationSection("languages")
-                    .getValues(false);
-
-            for (String lang : langs.keySet()) {
-
-                boolean installed = new File(
-                        Main.getInstance().getDataFolder(),
-                        "lang/" + lang + ".json"
-                ).exists();
-
-                ItemStack item = new ItemStack(installed ? Material.LIME_DYE : Material.GRAY_DYE);
-                ItemMeta meta = item.getItemMeta();
-                if (meta == null) continue;
-
-                boolean isCurrent = lang.equalsIgnoreCase(current);
-
-                meta.setDisplayName("§e" + lang.toUpperCase());
-
-                if (isCurrent) {
-                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                }
-
-                meta.setLore(List.of(
-                        isCurrent
-                                ? "§bCurrently selected"
-                                : installed
-                                    ? "§aInstalled (Click to use)"
-                                    : "§cNot installed (Click to download)"
-                ));
-
-                item.setItemMeta(meta);
-                inv.setItem(slot++, item);
+            if (index < slots.length) {
+                inv.setItem(slots[index++], head);
             }
         }
 
         p.openInventory(inv);
+    }
+
+    private static List<String> getAllLanguages() {
+
+        List<String> langs = new ArrayList<>();
+        langs.add("de");
+        langs.add("en");
+
+        if (Main.getInstance().getLangConfig().getConfigurationSection("languages") != null) {
+            langs.addAll(
+                    Main.getInstance()
+                            .getLangConfig()
+                            .getConfigurationSection("languages")
+                            .getKeys(false)
+            );
+        }
+
+        return langs;
     }
 }
