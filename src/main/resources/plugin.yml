@@ -21,6 +21,11 @@ commands:
   mode:
     description: Change game mode
     usage: /mode <hardcore|lifesteal>
+    permission: lifeplugin.admin
+  life:
+    description: Manage lives
+    usage: /life <give/set/remove/reset>
+    permission: lifecore.admin
 
 permissions:
   lifeplugin.admin:
