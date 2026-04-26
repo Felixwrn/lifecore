@@ -16,7 +16,7 @@ public class LanguageGUI {
     private static final String TITLE = "§6§lLanguage Selection";
 
     private static final Map<UUID, Integer> pages = new HashMap<>();
-    private static final int ITEMS_PER_PAGE = 14;
+    private static final int ITEMS_PER_PAGE = 21;
 
     public static String getTitle() {
         return TITLE;
@@ -30,7 +30,7 @@ public class LanguageGUI {
 
         pages.put(p.getUniqueId(), page);
 
-        Inventory inv = Bukkit.createInventory(null, 27, TITLE);
+        Inventory inv = Bukkit.createInventory(null, 45, TITLE);
 
         String current = Main.getInstance()
                 .getLanguageManager()
@@ -44,28 +44,45 @@ public class LanguageGUI {
             filler.setItemMeta(fMeta);
         }
 
-        for (int i = 0; i < 27; i++) {
-            if (i < 9 || i > 17 || i % 9 == 0 || i % 9 == 8) {
+        for (int i = 0; i < 45; i++) {
+            if (i < 9 || i >= 36 || i % 9 == 0 || i % 9 == 8) {
                 inv.setItem(i, filler);
             }
         }
 
+        // 📍 Slots
         int[] slots = {
                 10,11,12,13,14,15,16,
-                19,20,21,22,23,24,25
+                19,20,21,22,23,24,25,
+                28,29,30,31,32,33,34
         };
 
-        List<String> langs = getAllLanguages();
-        Collections.sort(langs);
+        // 🔥 Sprachen vorbereiten (DE & EN fix vorne)
+        List<String> all = getAllLanguages();
+
+        List<String> sorted = new ArrayList<>();
+
+        // Immer zuerst
+        sorted.add("de");
+        sorted.add("en");
+
+        // Rest sammeln
+        List<String> rest = new ArrayList<>(all);
+        rest.removeIf(lang -> lang.equalsIgnoreCase("de") || lang.equalsIgnoreCase("en"));
+
+        // alphabetisch sortieren
+        rest.sort(String::compareToIgnoreCase);
+
+        sorted.addAll(rest);
 
         int start = page * ITEMS_PER_PAGE;
-        int end = Math.min(start + ITEMS_PER_PAGE, langs.size());
+        int end = Math.min(start + ITEMS_PER_PAGE, sorted.size());
 
         int index = 0;
 
         for (int i = start; i < end; i++) {
 
-            String lang = langs.get(i);
+            String lang = sorted.get(i);
 
             boolean installed = new File(
                     Main.getInstance().getDataFolder(),
@@ -74,7 +91,6 @@ public class LanguageGUI {
 
             boolean isCurrent = lang.equalsIgnoreCase(current);
 
-            // 🧱 Item (ohne Flag → simple)
             Material mat = installed ? Material.LIME_DYE : Material.GRAY_DYE;
 
             ItemStack item = new ItemStack(mat);
@@ -115,12 +131,12 @@ public class LanguageGUI {
 
         // ⬅ Back
         if (page > 0) {
-            inv.setItem(18, createButton(Material.ARROW, "§c← Previous"));
+            inv.setItem(36, createButton(Material.ARROW, "§c← Previous"));
         }
 
         // ➡ Next
-        if (end < langs.size()) {
-            inv.setItem(26, createButton(Material.ARROW, "§aNext →"));
+        if (end < sorted.size()) {
+            inv.setItem(44, createButton(Material.ARROW, "§aNext →"));
         }
 
         p.openInventory(inv);
