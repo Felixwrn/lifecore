@@ -1,11 +1,15 @@
+auto-update: true
+update-interval: 300
+
 languages:
-  fr: "https://github.com/Felixwrn/langues/releases/download/fr/fr.json"
-  es: "https://github.com/Felixwrn/langues/releases/download/es/es.json"
-  it: "https://github.com/Felixwrn/langues/releases/download/it/it.json"
-  jp: ""
-  cn: ""
-  br: ""
-  nl: ""
-  be: ""
-  ru: ""
-  uk: ""
+  it: "https://raw.githubusercontent.com/Felixwrn/langues/main/it.json"
+  es: "https://raw.githubusercontent.com/Felixwrn/langues/main/es.json"
+  fr: "https://raw.githubusercontent.com/Felixwrn/langues/main/fr.json"
+  nl: "https://raw.githubusercontent.com/Felixwrn/langues/main/nl.json"
+  be: "https://raw.githubusercontent.com/Felixwrn/langues/main/be.json"
+  pl: "https://raw.githubusercontent.com/Felixwrn/langues/main/pl.json"
+  ru: "https://raw.githubusercontent.com/Felixwrn/langues/main/ru.json"
+  uk: "https://raw.githubusercontent.com/Felixwrn/langues/main/uk.json"
+  jp: "https://raw.githubusercontent.com/Felixwrn/langues/main/jp.json"
+  zh: "https://raw.githubusercontent.com/Felixwrn/langues/main/zh.json"
+  br: "https://raw.githubusercontent.com/Felixwrn/langues/main/br.json"
