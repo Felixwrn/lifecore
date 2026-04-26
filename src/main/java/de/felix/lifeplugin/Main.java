@@ -187,7 +187,21 @@ public class Main extends JavaPlugin implements Listener, TabExecutor {
 
             if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
 
-            String lang = e.getCurrentItem().getItemMeta().getDisplayName().replace("§e", "").toLowerCase();
+            String name = e.getCurrentItem().getItemMeta().getDisplayName();
+
+            // ⬅ / ➡ Pagination
+            if (name.contains("Next")) {
+                LanguageGUI.open(p, LanguageGUI.getPage(p.getUniqueId()) + 1);
+                return;
+            }
+
+            if (name.contains("Previous")) {
+                LanguageGUI.open(p, LanguageGUI.getPage(p.getUniqueId()) - 1);
+                return;
+            }
+
+            // Sprache auswählen
+            String lang = name.replace("§6★ ", "").replace("§f§l", "").toLowerCase();
 
             File file = new File(getDataFolder(), "lang/" + lang + ".json");
 
@@ -201,7 +215,7 @@ public class Main extends JavaPlugin implements Listener, TabExecutor {
             p.closeInventory();
         }
 
-        // MODE GUI (🔥 mit Sound + Animation)
+        // ModeGUI
         if (e.getView().getTitle().equals(ModeGUI.getTitle())) {
 
             e.setCancelled(true);
@@ -224,13 +238,9 @@ public class Main extends JavaPlugin implements Listener, TabExecutor {
             getConfig().set("mode", mode);
             saveConfig();
 
-            // 🔊 Sound
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
 
-            // ✨ Animation (GUI refresh)
-            Bukkit.getScheduler().runTaskLater(this, () -> {
-                ModeGUI.open(p);
-            }, 5L);
+            Bukkit.getScheduler().runTaskLater(this, () -> ModeGUI.open(p), 5L);
 
             p.sendMessage("§aMode set to " + mode);
         }
