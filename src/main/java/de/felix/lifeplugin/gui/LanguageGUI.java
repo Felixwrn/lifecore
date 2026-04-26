@@ -7,22 +7,28 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerProfile;
 
 import java.io.File;
-import java.net.URL;
 import java.util.*;
 
 public class LanguageGUI {
 
     private static final String TITLE = "§6§lLanguage Selection";
 
+    private static final Map<UUID, Integer> pages = new HashMap<>();
+    private static final int ITEMS_PER_PAGE = 14;
+
     public static String getTitle() {
         return TITLE;
     }
 
     public static void open(Player p) {
+        open(p, pages.getOrDefault(p.getUniqueId(), 0));
+    }
+
+    public static void open(Player p, int page) {
+
+        pages.put(p.getUniqueId(), page);
 
         Inventory inv = Bukkit.createInventory(null, 27, TITLE);
 
@@ -44,19 +50,22 @@ public class LanguageGUI {
             }
         }
 
-        // 📍 Slots
-        int[] slots = {10,11,12,13,14,15,16};
+        int[] slots = {
+                10,11,12,13,14,15,16,
+                19,20,21,22,23,24,25
+        };
+
+        List<String> langs = getAllLanguages();
+        Collections.sort(langs);
+
+        int start = page * ITEMS_PER_PAGE;
+        int end = Math.min(start + ITEMS_PER_PAGE, langs.size());
+
         int index = 0;
 
-        // 🌍 Flag Textures
-        Map<String, String> flags = new HashMap<>();
-        flags.put("de", "ddecc08cf7c1b666bc554d7f7325cd890b875b32f046e8994e37ff4fdccd");
-        flags.put("en", "ec9991997832ccabe97dc20ecd144eeb69859523dc14a19d2ba947629e7");
-        flags.put("fr", "76521a6aeb35737d07c37c28e84698669b4832769af9ccbcc2af36fb");
-        flags.put("es", "734698f24581fd33d6728648c6e6d8762bf5724e67f4929966cf4");
-        flags.put("it", "c07559ce8625281762f29669e99cc5b63845482fe");
+        for (int i = start; i < end; i++) {
 
-        for (String lang : getAllLanguages()) {
+            String lang = langs.get(i);
 
             boolean installed = new File(
                     Main.getInstance().getDataFolder(),
@@ -65,41 +74,25 @@ public class LanguageGUI {
 
             boolean isCurrent = lang.equalsIgnoreCase(current);
 
-            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta meta = (SkullMeta) head.getItemMeta();
+            // 🧱 Item (ohne Flag → simple)
+            Material mat = installed ? Material.LIME_DYE : Material.GRAY_DYE;
+
+            ItemStack item = new ItemStack(mat);
+            ItemMeta meta = item.getItemMeta();
 
             if (meta == null) continue;
 
-            // 🌍 Flag setzen
-            if (flags.containsKey(lang)) {
-                try {
-                    PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-
-                    profile.getTextures().setSkin(
-                            new URL("http://textures.minecraft.net/texture/" + flags.get(lang))
-                    );
-
-                    meta.setOwnerProfile(profile);
-
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("Failed to load flag for " + lang);
-                }
-            }
-
-            // ⭐ Name + Highlight
             meta.setDisplayName(
                     isCurrent
                             ? "§6★ §f§l" + lang.toUpperCase()
                             : "§f§l" + lang.toUpperCase()
             );
 
-            // ✨ Glint
             if (isCurrent) {
                 meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
 
-            // 📄 Lore
             meta.setLore(List.of(
                     "§7Status:",
                     isCurrent
@@ -113,14 +106,34 @@ public class LanguageGUI {
                             : "§cClick to download"
             ));
 
-            head.setItemMeta(meta);
+            item.setItemMeta(meta);
 
             if (index < slots.length) {
-                inv.setItem(slots[index++], head);
+                inv.setItem(slots[index++], item);
             }
         }
 
+        // ⬅ Back
+        if (page > 0) {
+            inv.setItem(18, createButton(Material.ARROW, "§c← Previous"));
+        }
+
+        // ➡ Next
+        if (end < langs.size()) {
+            inv.setItem(26, createButton(Material.ARROW, "§aNext →"));
+        }
+
         p.openInventory(inv);
+    }
+
+    private static ItemStack createButton(Material mat, String name) {
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(name);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 
     private static List<String> getAllLanguages() {
@@ -139,5 +152,9 @@ public class LanguageGUI {
         }
 
         return langs;
+    }
+
+    public static int getPage(UUID uuid) {
+        return pages.getOrDefault(uuid, 0);
     }
 }
