@@ -2,6 +2,7 @@ package de.felix.lifeplugin.lang;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import de.felix.lifeplugin.Main;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,8 +13,6 @@ import java.util.UUID;
 public class LanguageManager {
 
     private final HashMap<String, HashMap<String, String>> languages = new HashMap<>();
-    private final HashMap<UUID, String> playerLang = new HashMap<>();
-
     private final Gson gson = new Gson();
 
     // 📥 Load JSON files
@@ -48,14 +47,12 @@ public class LanguageManager {
         }
     }
 
-    // 🌍 Set language
-    public void setLanguage(UUID uuid, String lang) {
-        playerLang.put(uuid, lang);
-    }
-
-    // 🌍 Get language
+    // 🌍 Get language (JETZT AUS CONFIG!)
     public String getLanguage(UUID uuid) {
-        return playerLang.getOrDefault(uuid, "de");
+
+        return Main.getInstance()
+                .getConfig()
+                .getString("player-lang." + uuid, "de");
     }
 
     // 📤 Get message
