@@ -16,12 +16,11 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Calendar;
 
 public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
     private static Main instance;
-
     private LanguageManager languageManager;
 
     public static Main getInstance() {
@@ -35,7 +34,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
         saveDefaultConfig();
 
-        // 📂 Language System laden
+        // 📂 Language laden
         File langFolder = new File(getDataFolder(), "lang");
         if (!langFolder.exists()) langFolder.mkdirs();
 
@@ -55,7 +54,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
         register("livesgui");
         register("lifecore");
 
-        // Marketplace Reload
+        // Marketplace reload täglich
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             MarketplaceGUI.reload();
         }, getTicksUntilMidnight(), 20L * 60 * 60 * 24);
@@ -73,10 +72,6 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
         return languageManager;
     }
 
-    public String getLang(Player p) {
-        return getConfig().getString("player-lang." + p.getUniqueId(), "en");
-    }
-
     public void setLang(Player p, String lang) {
         getConfig().set("player-lang." + p.getUniqueId(), lang);
         saveConfig();
@@ -91,7 +86,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
         String title = e.getView().getTitle();
 
-        // 🔒 ALLE GUIs BLOCKEN
+        // 🔒 GUIs blockieren
         if (
                 title.contains("Mode") ||
                 title.contains("Marketplace") ||
@@ -101,7 +96,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
             e.setCancelled(true);
         }
 
-        // 🌍 LANGUAGE GUI
+        // 🌍 Language GUI
         if (title.contains("Language")) {
 
             if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
@@ -118,13 +113,13 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
             return;
         }
 
-        // 🔧 MODE BUILDER
+        // 🔧 Mode Builder
         if (title.contains("Mode Builder")) {
             ModeBuilderGUI.click(p, e.getSlot());
             return;
         }
 
-        // 📦 MARKETPLACE
+        // 📦 Marketplace
         if (title.contains("Marketplace")) {
 
             if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
@@ -138,7 +133,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
             return;
         }
 
-        // ⚙ MODE GUI
+        // ⚙ Mode GUI
         if (title.contains("Mode")) {
 
             if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
