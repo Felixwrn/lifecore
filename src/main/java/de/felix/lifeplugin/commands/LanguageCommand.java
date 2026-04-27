@@ -1,38 +1,51 @@
 package de.felix.lifeplugin.commands;
 
-import de.felix.lifeplugin.lang.LanguageManager;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import de.felix.lifeplugin.Main;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
-public class LanguageCommand {
+import java.util.Arrays;
+import java.util.List;
 
-    private final LanguageManager lang;
+public class LanguageCommand implements CommandExecutor, TabCompleter {
 
-    public LanguageCommand(LanguageManager lang) {
-        this.lang = lang;
-    }
+    private static final List<String> LANGS = Arrays.asList("de", "en", "fr", "es", "it");
 
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (!(sender instanceof Player p)) return true;
 
         if (args.length == 0) {
-            p.sendMessage("§cUsage: /language <de|en>");
+            p.sendMessage("§cUsage: /language <" + String.join("|", LANGS) + ">");
             return true;
         }
 
-        String langCode = args[0].toLowerCase();
+        String lang = args[0].toLowerCase();
 
-        if (!langCode.equals("de") && !langCode.equals("en")) {
+        // ❌ Ungültige Sprache
+        if (!LANGS.contains(lang)) {
             p.sendMessage("§cUnknown language!");
             return true;
         }
 
-        lang.setLanguage(p.getUniqueId(), langCode);
+        // ✅ Sprache setzen (NEUES SYSTEM)
+        Main.getInstance().setLang(p, lang);
 
-        p.sendMessage("§aLanguage set to: " + langCode);
+        p.sendMessage("§aLanguage set to: §e" + lang);
 
         return true;
+    }
+
+    // ---------------- TAB COMPLETION ----------------
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+
+        if (args.length == 1) {
+            return LANGS;
+        }
+
+        return List.of();
     }
 }
