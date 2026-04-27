@@ -3,6 +3,7 @@ package de.felix.lifeplugin;
 import com.google.gson.JsonObject;
 import de.felix.lifeplugin.gui.*;
 import de.felix.lifeplugin.util.ChatInput;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -14,11 +15,13 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Calendar;
+import java.util.*;
 
 public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
     private static Main instance;
+
+    private final Map<UUID, String> playerLang = new HashMap<>();
 
     public static Main getInstance() {
         return instance;
@@ -34,16 +37,14 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new ChatInput(), this);
 
-        // Commands
         register("mode");
         register("market");
         register("modes");
         register("language");
-        register("lifecore");
-        register("livesgui");
         register("langgui");
+        register("livesgui");
+        register("lifecore");
 
-        // Daily Marketplace Reload
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             MarketplaceGUI.reload();
         }, getTicksUntilMidnight(), 20L * 60 * 60 * 24);
@@ -55,7 +56,16 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
         if (getCommand(cmd) != null) getCommand(cmd).setExecutor(this);
     }
 
-    // ---------------- CLICK ----------------
+    // ---------------- LANGUAGE ----------------
+    public String getLang(Player p) {
+        return playerLang.getOrDefault(p.getUniqueId(), "en");
+    }
+
+    public void setLang(Player p, String lang) {
+        playerLang.put(p.getUniqueId(), lang);
+    }
+
+    // ---------------- GUI CLICK ----------------
     @EventHandler
     public void onClick(InventoryClickEvent e) {
 
@@ -63,16 +73,41 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
         String title = e.getView().getTitle();
 
-        // Mode Builder
-        if (title.contains("Mode Builder")) {
+        // 🔒 ALLE GUIs BLOCKEN
+        if (
+                title.contains("Mode") ||
+                title.contains("Marketplace") ||
+                title.contains("Language") ||
+                title.contains("Lives")
+        ) {
             e.setCancelled(true);
+        }
+
+        // 🔹 LANGUAGE GUI
+        if (title.contains("Language")) {
+
+            if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
+
+            String lang = e.getCurrentItem().getItemMeta().getDisplayName()
+                    .replace("§f", "")
+                    .toLowerCase();
+
+            setLang(p, lang);
+
+            p.sendMessage("§aLanguage set to " + lang);
+
+            LanguageGUI.open(p); // reload GUI
+            return;
+        }
+
+        // 🔹 MODE BUILDER
+        if (title.contains("Mode Builder")) {
             ModeBuilderGUI.click(p, e.getSlot());
             return;
         }
 
-        // Marketplace
+        // 🔹 MARKETPLACE
         if (title.contains("Marketplace")) {
-            e.setCancelled(true);
 
             if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
 
@@ -85,9 +120,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
             return;
         }
 
-        // Mode GUI
+        // 🔹 MODE GUI
         if (title.contains("Mode")) {
-            e.setCancelled(true);
 
             if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
 
@@ -100,8 +134,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
             saveConfig();
 
             p.sendMessage("§aMode set to " + name);
+
             ModeGUI.open(p);
-            return;
         }
     }
 
@@ -129,16 +163,17 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
                 ModeGUI.open(p);
                 return true;
 
-            case "livesgui":
-                LifeGUI.open(p);
-                return true;
-
             case "langgui":
                 LanguageGUI.open(p);
                 return true;
 
+            case "livesgui":
+                LifeGUI.open(p);
+                return true;
+
             case "language":
                 if (args.length == 1) {
+                    setLang(p, args[0]);
                     p.sendMessage("§aLanguage set to " + args[0]);
                 }
                 return true;
@@ -172,7 +207,6 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
             } catch (Exception e) {
                 p.sendMessage("§cDownload failed!");
-                e.printStackTrace();
             }
         });
     }
