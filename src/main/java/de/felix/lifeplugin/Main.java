@@ -1,22 +1,21 @@
 package de.felix.lifeplugin;
 
-import de.felix.lifeplugin.gui.*;
-import de.felix.lifeplugin.market.MarketplaceManager;
-import de.felix.lifeplugin.util.ChatInput;
 import com.google.gson.JsonObject;
+import de.felix.lifeplugin.gui.*;
+import de.felix.lifeplugin.util.ChatInput;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Calendar;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -34,34 +33,28 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new ChatInput(), this);
 
-        // Daily Marketplace Reload
+        // 🔄 Daily Marketplace Reload (0:00)
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             MarketplaceGUI.reload();
         }, getTicksUntilMidnight(), 20L * 60 * 60 * 24);
+
+        getLogger().info("LifePlugin enabled!");
     }
 
-    // ---------------- ACTION BAR FIX ----------------
-    public void sendActionBar(Player p, String msg) {
-        p.spigot().sendMessage(
-                net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
-                new net.md_5.bungee.api.chat.TextComponent(msg)
-        );
-    }
-
-    // ---------------- GUI EVENTS ----------------
+    // ---------------- GUI CLICK ----------------
     @EventHandler
     public void onClick(InventoryClickEvent e) {
 
         if (!(e.getWhoClicked() instanceof Player p)) return;
 
-        // Mode Builder
+        // 🔹 Mode Builder
         if (e.getView().getTitle().startsWith("§6Mode Builder:")) {
             e.setCancelled(true);
             ModeBuilderGUI.click(p, e.getSlot());
             return;
         }
 
-        // Marketplace
+        // 🔹 Marketplace
         if (e.getView().getTitle().equals("§6Marketplace")) {
 
             e.setCancelled(true);
@@ -76,6 +69,27 @@ public class Main extends JavaPlugin implements Listener {
             String url = obj.get("url").getAsString();
 
             downloadMode(name, url, p);
+            return;
+        }
+
+        // 🔹 Mode Selector
+        if (e.getView().getTitle().equals(ModeGUI.getTitle(p))) {
+
+            e.setCancelled(true);
+
+            if (e.getCurrentItem() == null || e.getCurrentItem().getItemMeta() == null) return;
+
+            String name = e.getCurrentItem().getItemMeta().getDisplayName()
+                    .replace("§6★ ", "")
+                    .replace("§e", "")
+                    .toLowerCase();
+
+            getConfig().set("mode", name);
+            saveConfig();
+
+            p.sendMessage("§aMode set to " + name);
+
+            ModeGUI.open(p);
         }
     }
 
@@ -95,6 +109,11 @@ public class Main extends JavaPlugin implements Listener {
             return true;
         }
 
+        if (cmd.getName().equalsIgnoreCase("modes")) {
+            ModeGUI.open(p);
+            return true;
+        }
+
         return false;
     }
 
@@ -102,8 +121,8 @@ public class Main extends JavaPlugin implements Listener {
     private void downloadMode(String name, String urlStr, Player p) {
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-
             try {
+
                 URL url = new URL(urlStr);
 
                 File folder = new File(getDataFolder(), "modes");
