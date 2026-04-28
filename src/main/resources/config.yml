@@ -1,4 +1,31 @@
-
+# 🔑 OpenAI Settings
 openai:
-  api-key: "YOUR_API_KEY"
+  api-key: "DEIN_API_KEY"
   model: "gpt-4o-mini"
+
+# 🌍 Spieler Sprachen
+player-lang: {}
+
+# ⚙ Aktueller aktiver Mode
+mode: "default"
+
+# 🎮 Alle gespeicherten Modi
+modes:
+
+  default:
+    lives: 10
+    regen: true
+    ban: false
+    lifesteal: false
+
+  hardcore:
+    lives: 3
+    regen: false
+    ban: true
+    lifesteal: false
+
+  lifesteal:
+    lives: 10
+    regen: true
+    ban: false
+    lifesteal: true
