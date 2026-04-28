@@ -1,9 +1,43 @@
-
 name: WRNPlugin
-version: 1.0
+version: 2.0
 main: de.felix.lifeplugin.Main
 api-version: 1.21
+author: Felixwrn
 
 commands:
+
   mode:
-    description: Mode command
+    description: Open mode GUI or use AI
+    usage: /mode | /mode ai <description>
+    permission: lifeplugin.admin
+
+  market:
+    description: Open marketplace GUI
+    usage: /market
+
+  modes:
+    description: Open modes GUI
+    usage: /modes
+
+  langgui:
+    description: Open language GUI
+    aliases: [lg, lang]
+
+  livesgui:
+    description: Open lives GUI
+    aliases: [lives, leben]
+
+  language:
+    description: Change language
+    usage: /language <lang>
+
+  lifecore:
+    description: Reload plugin
+    usage: /lifecore reload
+    aliases: [lc, core, wrn]
+
+permissions:
+
+  lifeplugin.admin:
+    description: Allows mode changes
+    default: op
