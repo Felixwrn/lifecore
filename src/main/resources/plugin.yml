@@ -5,4 +5,22 @@ api-version: 1.21
 
 commands:
   livesgui:
+    description: Öffnet das Lives GUI
+    usage: /livesgui
+
   langgui:
+    description: Öffnet das Language GUI
+    usage: /langgui
+
+  modegui:
+    description: Öffnet das Mode GUI
+    usage: /modegui
+
+  market:
+    description: Öffnet den Marketplace
+    usage: /market
+
+permissions:
+  life.admin:
+    description: Darf Leben ändern
+    default: op
