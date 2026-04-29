@@ -1,5 +1,5 @@
 
-package de.felix.lifeplugin.commands;
+/* package de.felix.lifeplugin.commands;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -61,3 +61,4 @@ public class ModeAICommand implements CommandExecutor {
         return "Convert this into JSON with fields name and lives: " + input;
     }
 }
+*/
