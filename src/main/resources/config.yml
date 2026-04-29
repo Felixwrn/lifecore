@@ -1,31 +1,48 @@
-# 🔑 OpenAI Settings
-openai:
-  api-key: "DEIN_API_KEY"
-  model: "gpt-4o-mini"
+# =========================
+# WRN LifePlugin Config
+# =========================
 
-# 🌍 Spieler Sprachen
-player-lang: {}
+# Standard Leben (für neue Spieler)
+default-lives: 3
 
-# ⚙ Aktueller aktiver Mode
-mode: "default"
+# Maximale Leben (für GUI Limit)
+max-lives: 10
 
-# 🎮 Alle gespeicherten Modi
-modes:
+# =========================
+# MODE SYSTEM
+# =========================
+mode:
+  name: "Normal"
+  lives: 3
+  banOnZero: false
 
-  default:
-    lives: 10
-    regen: true
-    ban: false
-    lifesteal: false
-
+# =========================
+# MARKETPLACE MODES
+# =========================
+marketplace:
   hardcore:
-    lives: 3
-    regen: false
-    ban: true
-    lifesteal: false
+    name: "Hardcore"
+    lives: 1
+    banOnZero: true
 
-  lifesteal:
-    lives: 10
-    regen: true
-    ban: false
-    lifesteal: true
+  pro:
+    name: "Pro"
+    lives: 5
+    banOnZero: false
+
+  vanilla_plus:
+    name: "Vanilla+"
+    lives: 3
+    banOnZero: false
+
+# =========================
+# PLAYER DATA (AUTO)
+# =========================
+lives: {}
+
+# =========================
+# SETTINGS
+# =========================
+settings:
+  actionbar: true
+  update-interval: 40  # ticks (20 = 1 Sekunde)
