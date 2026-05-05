@@ -36,7 +36,15 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Gson (für Marketplace JSON) -->
+        <!-- 🔥 WRN API (DEIN FIX) -->
+        <dependency>
+            <groupId>de.wrn</groupId>
+            <artifactId>wrn-api</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -60,7 +68,7 @@
                 </configuration>
             </plugin>
 
-            <!-- SHADE (sehr wichtig für Plugins!) -->
+            <!-- SHADE -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
