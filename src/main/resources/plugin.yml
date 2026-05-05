@@ -3,6 +3,9 @@ version: 2.0-Beta
 main: de.felix.lifeplugin.Main
 api-version: 1.21
 
+depend:
+  - WRN-API
+
 commands:
   livesgui:
     description: Öffnet das Lives GUI
@@ -19,6 +22,7 @@ commands:
   market:
     description: Öffnet den Marketplace
     usage: /market
+  test:
 
 permissions:
   life.admin:
