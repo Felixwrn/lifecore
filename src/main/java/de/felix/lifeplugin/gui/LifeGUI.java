@@ -7,7 +7,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class LifeGUI {
-    public static final String TITLE = "§cLives";
+    public static final String TITLE = "§cLives ❤ ";
 
     public static void open(Player p) {
         Inventory inv = Bukkit.createInventory(null, 27, TITLE);
