@@ -37,12 +37,13 @@
         </dependency>
 
         <!-- 🔥 WRN API (DEIN FIX) -->
-        <dependency>
-            <groupId>de.wrn</groupId>
-            <artifactId>wrn-api</artifactId>
-            <version>1.0</version>
-            <scope>provided</scope>
-        </dependency>
+<dependency>
+    <groupId>de.wrn</groupId>
+    <artifactId>wrn-api</artifactId>
+    <version>1.0</version>
+    <scope>system</scope>
+    <systemPath>${project.basedir}/libs/wrn-api.jar</systemPath>
+</dependency>
 
         <!-- Gson -->
         <dependency>
