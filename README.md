@@ -1,6 +1,5 @@
-This plugin will be no longer updatet until We made AI in it
-
-WRNlabs - Ai made in germany
+Dev update:
+- We will bring the next update on 10 May 2026
 
 ---
 
