@@ -2,6 +2,7 @@ name: LifeCore
 version: 2.0-Beta
 main: de.felix.lifeplugin.Main
 api-version: 1.21
+author: WRNlabs
 
 depend:
   - WRN-API
