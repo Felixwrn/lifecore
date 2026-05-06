@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WRN LifeCore Docs</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0b0f17;
+    color:white;
+    line-height:1.6;
+}
+
+.sidebar{
+    width:100%;
+    background:#111827;
+    padding:20px;
+    border-bottom:1px solid #1f2937;
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.sidebar h1{
+    margin:0 0 15px 0;
+    color:#ff3b3b;
+    font-size:28px;
+}
+
+.nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.nav a{
+    text-decoration:none;
+    color:#cbd5e1;
+    background:#1e293b;
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:14px;
+}
+
+.nav a:hover{
+    background:#334155;
+    color:white;
+}
+
+.content{
+    padding:20px;
+    max-width:1100px;
+    margin:auto;
+}
+
+.hero{
+    background:linear-gradient(135deg,#111827,#1e293b);
+    border:1px solid #1f2937;
+    border-radius:24px;
+    padding:35px 25px;
+    margin-bottom:25px;
+}
+
+.hero h1{
+    margin-top:0;
+    font-size:42px;
+}
+
+.hero p{
+    color:#94a3b8;
+    font-size:18px;
+}
+
+.card{
+    background:#111827;
+    border:1px solid #1f2937;
+    border-radius:20px;
+    padding:25px;
+    margin-bottom:20px;
+}
+
+.card h2{
+    margin-top:0;
+    color:#60a5fa;
+}
+
+pre{
+    background:#1e293b;
+    border-radius:14px;
+    padding:15px;
+    overflow:auto;
+}
+
+code{
+    color:#93c5fd;
+}
+
+ul,ol{
+    padding-left:20px;
+}
+
+.footer{
+    text-align:center;
+    padding:30px;
+    color:#64748b;
+}
+
+@media (min-width: 900px){
+
+    .layout{
+        display:flex;
+    }
+
+    .sidebar{
+        width:260px;
+        height:100vh;
+        border-right:1px solid #1f2937;
+        border-bottom:none;
+        position:fixed;
+    }
+
+    .nav{
+        flex-direction:column;
+    }
+
+    .content{
+        margin-left:280px;
+        padding:40px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<div class="sidebar">
+    <h1>WRN LifeCore</h1>
+
+    <div class="nav">
+        <a href="#install">Installation</a>
+        <a href="#commands">Commands</a>
+        <a href="#config">Configuration</a>
+        <a href="#api">Developer API</a>
+        <a href="#devmode">DevMode</a>
+        <a href="#roadmap">Roadmap</a>
+    </div>
+</div>
+
+<div class="content">
+
+<div class="hero">
+    <h1>WRN LifeCore Docs</h1>
+    <p>
+        The next-generation modular life system for Minecraft servers powered by WRN API.
+    </p>
+</div>
+
+<div class="card" id="install">
+    <h2>Installation</h2>
+
+    <ol>
+        <li>Download <code>WRN-API.jar</code></li>
+        <li>Download <code>LifeCore.jar</code></li>
+        <li>Put both files into your plugins folder</li>
+        <li>Restart your server</li>
+    </ol>
+</div>
+
+<div class="card" id="commands">
+    <h2>Commands</h2>
+
+<pre>
+/livesgui
+/langgui
+/modegui
+/market
+/wrn devmode
+/wrn confirm &lt;plugin&gt;
+</pre>
+</div>
+
+<div class="card" id="config">
+    <h2>Configuration</h2>
+
+<pre>
+default-lives: 3
+
+dev-mode:
+  enabled: true
+  confirmed-plugins: []
+</pre>
+</div>
+
+<div class="card" id="api">
+    <h2>Developer API</h2>
+
+<pre>
+WRNAPI.getDevMode().isEnabled();
+</pre>
+
+<pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;de.wrn&lt;/groupId&gt;
+    &lt;artifactId&gt;wrn-api&lt;/artifactId&gt;
+    &lt;version&gt;1.0&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+</div>
+
+<div class="card" id="devmode">
+    <h2>DevMode</h2>
+
+    <p>
+        DevMode allows external plugins to access advanced WRN systems safely.
+    </p>
+
+<pre>
+/wrn devmode
+/wrn confirm ExamplePlugin
+</pre>
+</div>
+
+<div class="card" id="roadmap">
+    <h2>Roadmap</h2>
+
+    <ul>
+        <li>2026 Summer Update</li>
+        <li>2026 Autumn Update</li>
+        <li>2026 Winter Update</li>
+        <li>2027 Spring Update</li>
+        <li>2027 Summer Expansion</li>
+        <li>2027 Autumn Expansion</li>
+        <li>2027 Winter Performance Update</li>
+    </ul>
+</div>
+
+<div class="footer">
+    WRN LifeCore Documentation • Mobile Optimized
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
