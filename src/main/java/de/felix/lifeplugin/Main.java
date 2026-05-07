@@ -226,35 +226,56 @@ public class Main extends JavaPlugin implements Listener {
             );
 
             Inventory editInv = Bukkit.createInventory(
-                    null,
-                    27,
-                    "§cEdit Lives"
-            );
+        null,
+        27,
+        "§cEdit Lives"
+);
 
-            // +1 Life
-            ItemStack add = new ItemStack(Material.LIME_WOOL);
+// CURRENT LIVES
+int currentLives = getConfig().getInt(
+        "lives." + target.getUniqueId(),
+        getConfig().getInt("default-lives", 3)
+);
 
-            ItemMeta addMeta = add.getItemMeta();
+// PLAYER HEAD
+ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
 
-            addMeta.setDisplayName("§a+1 Life");
+ItemMeta headMeta = playerHead.getItemMeta();
 
-            add.setItemMeta(addMeta);
+headMeta.setDisplayName("§e" + target.getName());
 
-            // -1 Life
-            ItemStack remove = new ItemStack(Material.RED_WOOL);
+java.util.List<String> lore = new java.util.ArrayList<>();
 
-            ItemMeta removeMeta = remove.getItemMeta();
+lore.add("§7Current Lives: §c" + currentLives);
 
-            removeMeta.setDisplayName("§c-1 Life");
+headMeta.setLore(lore);
 
-            remove.setItemMeta(removeMeta);
+playerHead.setItemMeta(headMeta);
 
-            editInv.setItem(11, add);
-            editInv.setItem(15, remove);
+// +1 Life
+ItemStack add = new ItemStack(Material.LIME_WOOL);
 
-            p.openInventory(editInv);
-        }
+ItemMeta addMeta = add.getItemMeta();
 
+addMeta.setDisplayName("§a+1 Life");
+
+add.setItemMeta(addMeta);
+
+// -1 Life
+ItemStack remove = new ItemStack(Material.RED_WOOL);
+
+ItemMeta removeMeta = remove.getItemMeta();
+
+removeMeta.setDisplayName("§c-1 Life");
+
+remove.setItemMeta(removeMeta);
+
+// SET ITEMS
+editInv.setItem(13, playerHead);
+editInv.setItem(11, add);
+editInv.setItem(15, remove);
+
+p.openInventory(editInv);
         // =========================
         // EDIT LIVES GUI
         // =========================
