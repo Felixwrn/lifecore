@@ -32,6 +32,7 @@ commands:
     aliases:
       - mode
       - modes
+    permission: life.mode
 
  # market:
   #  description: Opens the Marketplace
@@ -41,4 +42,8 @@ permissions:
 
   life.admin:
     description: Allows editing player lives
+    default: op
+
+  life.mode:
+    description: Allows to edit the server mode
     default: op
