@@ -1,7 +1,9 @@
 package de.felix.lifeplugin;
 
+import de.felix.lifeplugin.challenge.Challenge;
 import de.felix.lifeplugin.challenge.ChallengeListener;
 import de.felix.lifeplugin.challenge.ChallengeManager;
+import de.felix.lifeplugin.challenge.GitHubChallengeDownloader;
 import de.felix.lifeplugin.gui.LanguageGUI;
 import de.felix.lifeplugin.gui.LifeGUI;
 import de.felix.lifeplugin.gui.MarketplaceGUI;
@@ -47,10 +49,12 @@ public class Main extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
 
-        // MAIN EVENTS
+        // EVENTS
         Bukkit.getPluginManager().registerEvents(this, this);
 
         // CHALLENGE SYSTEM
+        GitHubChallengeDownloader.downloadChallenges();
+
         ChallengeManager.loadChallenges();
 
         Bukkit.getPluginManager().registerEvents(
@@ -58,6 +62,7 @@ public class Main extends JavaPlugin implements Listener {
                 this
         );
 
+        // SETTINGS
         boolean actionbarEnabled = getConfig().getBoolean(
                 "settings.actionbar",
                 true
@@ -89,7 +94,7 @@ public class Main extends JavaPlugin implements Listener {
             }, 0L, interval);
         }
 
-        getLogger().info("§aWRN LifePlugin enabled!");
+        getLogger().info("§aWRN LifeCore enabled!");
     }
 
     @Override
@@ -98,7 +103,12 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(
+            CommandSender sender,
+            Command cmd,
+            String label,
+            String[] args
+    ) {
 
         if (!(sender instanceof Player p)) {
             return true;
@@ -111,11 +121,17 @@ public class Main extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
 
             if (!p.hasPermission("life.admin")) {
+
                 p.sendMessage("§cNo permission!");
+
                 return true;
             }
 
-            Inventory inv = Bukkit.createInventory(null, 54, LifeGUI.TITLE);
+            Inventory inv = Bukkit.createInventory(
+                    null,
+                    54,
+                    LifeGUI.TITLE
+            );
 
             int slot = 0;
 
@@ -139,7 +155,9 @@ public class Main extends JavaPlugin implements Listener {
 
                 slot++;
 
-                if (slot >= 54) break;
+                if (slot >= 54) {
+                    break;
+                }
             }
 
             p.openInventory(inv);
@@ -152,7 +170,9 @@ public class Main extends JavaPlugin implements Listener {
         // =========================
 
         if (cmd.getName().equalsIgnoreCase("langgui")) {
+
             LanguageGUI.open(p);
+
             return true;
         }
 
@@ -161,7 +181,9 @@ public class Main extends JavaPlugin implements Listener {
         // =========================
 
         if (cmd.getName().equalsIgnoreCase("modegui")) {
+
             ModeGUI.open(p);
+
             return true;
         }
 
@@ -170,7 +192,41 @@ public class Main extends JavaPlugin implements Listener {
         // =========================
 
         if (cmd.getName().equalsIgnoreCase("market")) {
+
             MarketplaceGUI.open(p);
+
+            return true;
+        }
+
+        // =========================
+        // CHALLENGE COMMAND
+        // =========================
+
+        if (cmd.getName().equalsIgnoreCase("challenge")) {
+
+            p.sendMessage("§6Active Challenges:");
+
+            for (Challenge challenge :
+                    ChallengeManager.getChallenges().values()) {
+
+                int progress = getConfig().getInt(
+                        "challenge-progress."
+                                + p.getUniqueId()
+                                + "."
+                                + challenge.getId(),
+                        0
+                );
+
+                p.sendMessage(
+                        "§e" + challenge.getName() +
+                                " §7(" +
+                                progress +
+                                "/" +
+                                challenge.getGoal() +
+                                ")"
+                );
+            }
+
             return true;
         }
 
@@ -216,9 +272,14 @@ public class Main extends JavaPlugin implements Listener {
 
             String lang = name.contains("(en)") ? "en" : "de";
 
-            WRNAPI.setLanguage(p.getUniqueId(), lang);
+            WRNAPI.setLanguage(
+                    p.getUniqueId(),
+                    lang
+            );
 
-            p.sendMessage("§aLanguage changed to §e" + lang);
+            p.sendMessage(
+                    "§aLanguage changed to §e" + lang
+            );
 
             p.closeInventory();
         }
@@ -236,7 +297,9 @@ public class Main extends JavaPlugin implements Listener {
             Player target = Bukkit.getPlayer(playerName);
 
             if (target == null) {
+
                 p.sendMessage("§cPlayer offline!");
+
                 return;
             }
 
@@ -254,16 +317,22 @@ public class Main extends JavaPlugin implements Listener {
 
         if (title.equals("§cEdit Lives")) {
 
-            UUID targetUUID = selectedPlayer.get(p.getUniqueId());
+            UUID targetUUID =
+                    selectedPlayer.get(p.getUniqueId());
 
             if (targetUUID == null) {
+
                 p.sendMessage("§cNo player selected!");
+
                 return;
             }
 
             int lives = getConfig().getInt(
                     "lives." + targetUUID,
-                    getConfig().getInt("default-lives", 3)
+                    getConfig().getInt(
+                            "default-lives",
+                            3
+                    )
             );
 
             // +1
@@ -301,7 +370,8 @@ public class Main extends JavaPlugin implements Listener {
             if (target != null) {
 
                 target.sendMessage(
-                        "§eYour lives were updated: §c" + lives
+                        "§eYour lives were updated: §c"
+                                + lives
                 );
 
                 openEditLivesGUI(p, target);
@@ -336,11 +406,17 @@ public class Main extends JavaPlugin implements Listener {
                     return;
             }
 
-            getConfig().set("mode.current", mode);
+            getConfig().set(
+                    "mode.current",
+                    mode
+            );
 
             saveConfig();
 
-            p.sendMessage("§aServer mode changed to: §e" + mode);
+            p.sendMessage(
+                    "§aServer mode changed to: §e"
+                            + mode
+            );
 
             p.closeInventory();
         }
@@ -366,43 +442,60 @@ public class Main extends JavaPlugin implements Listener {
 
         saveConfig();
 
-        p.sendMessage("§cLives remaining: §f" + lives);
+        p.sendMessage(
+                "§cLives remaining: §f" + lives
+        );
 
         // CURRENT MODE
         String mode = getServerMode();
 
         boolean banOnZero = getConfig().getBoolean(
-                "marketplace." + mode + ".banOnZero",
+                "marketplace."
+                        + mode
+                        + ".banOnZero",
                 true
         );
 
         // OUT OF LIVES
         if (lives <= 0) {
 
-            p.sendMessage("§cYou are out of lives!");
+            p.sendMessage(
+                    "§cYou are out of lives!"
+            );
 
             if (banOnZero) {
 
                 // BAN PLAYER
-                Bukkit.getBanList(BanList.Type.NAME).addBan(
-                        p.getName(),
-                        "You lost all your lives!",
-                        null,
-                        "WRN LifeCore"
-                );
+                Bukkit.getBanList(BanList.Type.NAME)
+                        .addBan(
+                                p.getName(),
+                                "You lost all your lives!",
+                                null,
+                                "WRN LifeCore"
+                        );
 
-                p.kickPlayer("§cYou lost all your lives!");
+                p.kickPlayer(
+                        "§cYou lost all your lives!"
+                );
 
             } else {
 
                 // SPECTATOR MODE
-                Bukkit.getScheduler().runTaskLater(this, () -> {
+                Bukkit.getScheduler().runTaskLater(
+                        this,
+                        () -> {
 
-                    p.setGameMode(GameMode.SPECTATOR);
+                            p.setGameMode(
+                                    GameMode.SPECTATOR
+                            );
 
-                    p.sendMessage("§7You are now in spectator mode!");
+                            p.sendMessage(
+                                    "§7You are now in spectator mode!"
+                            );
 
-                }, 2L);
+                        },
+                        2L
+                );
             }
         }
     }
@@ -411,7 +504,10 @@ public class Main extends JavaPlugin implements Listener {
     // EDIT GUI METHOD
     // =========================
 
-    private void openEditLivesGUI(Player admin, Player target) {
+    private void openEditLivesGUI(
+            Player admin,
+            Player target
+    ) {
 
         Inventory editInv = Bukkit.createInventory(
                 null,
@@ -422,22 +518,30 @@ public class Main extends JavaPlugin implements Listener {
         int currentLives = getLives(target);
 
         // PLAYER HEAD
-        ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
+        ItemStack playerHead =
+                new ItemStack(Material.PLAYER_HEAD);
 
-        ItemMeta headMeta = playerHead.getItemMeta();
+        ItemMeta headMeta =
+                playerHead.getItemMeta();
 
-        headMeta.setDisplayName("§e" + target.getName());
+        headMeta.setDisplayName(
+                "§e" + target.getName()
+        );
 
         List<String> lore = new ArrayList<>();
 
-        lore.add("§7Current Lives: §c" + currentLives);
+        lore.add(
+                "§7Current Lives: §c"
+                        + currentLives
+        );
 
         headMeta.setLore(lore);
 
         playerHead.setItemMeta(headMeta);
 
         // +1 LIFE
-        ItemStack add = new ItemStack(Material.LIME_WOOL);
+        ItemStack add =
+                new ItemStack(Material.LIME_WOOL);
 
         ItemMeta addMeta = add.getItemMeta();
 
@@ -446,9 +550,11 @@ public class Main extends JavaPlugin implements Listener {
         add.setItemMeta(addMeta);
 
         // -1 LIFE
-        ItemStack remove = new ItemStack(Material.RED_WOOL);
+        ItemStack remove =
+                new ItemStack(Material.RED_WOOL);
 
-        ItemMeta removeMeta = remove.getItemMeta();
+        ItemMeta removeMeta =
+                remove.getItemMeta();
 
         removeMeta.setDisplayName("§c-1 Life");
 
@@ -478,7 +584,10 @@ public class Main extends JavaPlugin implements Listener {
 
         return getConfig().getInt(
                 "lives." + p.getUniqueId(),
-                getConfig().getInt("default-lives", 3)
+                getConfig().getInt(
+                        "default-lives",
+                        3
+                )
         );
     }
 }
