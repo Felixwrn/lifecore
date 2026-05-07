@@ -22,7 +22,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
@@ -54,7 +56,7 @@ public class Main extends JavaPlugin implements Listener {
                 40
         );
 
-        // ActionBar Loop
+        // ACTIONBAR LOOP
         if (actionbarEnabled) {
 
             Bukkit.getScheduler().runTaskTimer(this, () -> {
@@ -113,6 +115,12 @@ public class Main extends JavaPlugin implements Listener {
 
                 meta.setDisplayName("§e" + target.getName());
 
+                List<String> lore = new ArrayList<>();
+
+                lore.add("§7Lives: §c" + getLives(target));
+
+                meta.setLore(lore);
+
                 head.setItemMeta(meta);
 
                 inv.setItem(slot, head);
@@ -166,7 +174,7 @@ public class Main extends JavaPlugin implements Listener {
 
         String title = e.getView().getTitle();
 
-        // GUI Protection
+        // GUI PROTECTION
         if (title.equals(LanguageGUI.TITLE)
                 || title.equals(LifeGUI.TITLE)
                 || title.equals(ModeGUI.TITLE)
@@ -225,57 +233,9 @@ public class Main extends JavaPlugin implements Listener {
                     target.getUniqueId()
             );
 
-            Inventory editInv = Bukkit.createInventory(
-        null,
-        27,
-        "§cEdit Lives"
-);
+            openEditLivesGUI(p, target);
+        }
 
-// CURRENT LIVES
-int currentLives = getConfig().getInt(
-        "lives." + target.getUniqueId(),
-        getConfig().getInt("default-lives", 3)
-);
-
-// PLAYER HEAD
-ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
-
-ItemMeta headMeta = playerHead.getItemMeta();
-
-headMeta.setDisplayName("§e" + target.getName());
-
-java.util.List<String> lore = new java.util.ArrayList<>();
-
-lore.add("§7Current Lives: §c" + currentLives);
-
-headMeta.setLore(lore);
-
-playerHead.setItemMeta(headMeta);
-
-// +1 Life
-ItemStack add = new ItemStack(Material.LIME_WOOL);
-
-ItemMeta addMeta = add.getItemMeta();
-
-addMeta.setDisplayName("§a+1 Life");
-
-add.setItemMeta(addMeta);
-
-// -1 Life
-ItemStack remove = new ItemStack(Material.RED_WOOL);
-
-ItemMeta removeMeta = remove.getItemMeta();
-
-removeMeta.setDisplayName("§c-1 Life");
-
-remove.setItemMeta(removeMeta);
-
-// SET ITEMS
-editInv.setItem(13, playerHead);
-editInv.setItem(11, add);
-editInv.setItem(15, remove);
-
-p.openInventory(editInv);
         // =========================
         // EDIT LIVES GUI
         // =========================
@@ -327,9 +287,12 @@ p.openInventory(editInv);
             Player target = Bukkit.getPlayer(targetUUID);
 
             if (target != null) {
+
                 target.sendMessage(
                         "§eYour lives were updated: §c" + lives
                 );
+
+                openEditLivesGUI(p, target);
             }
 
             p.sendMessage("§aLives updated!");
@@ -361,7 +324,6 @@ p.openInventory(editInv);
                     return;
             }
 
-            // SAVE GLOBAL SERVER MODE
             getConfig().set("mode.current", mode);
 
             saveConfig();
@@ -427,6 +389,61 @@ p.openInventory(editInv);
                 p.sendMessage("§cYou are now in spectator mode!");
             }
         }
+    }
+
+    // =========================
+    // EDIT GUI METHOD
+    // =========================
+
+    private void openEditLivesGUI(Player admin, Player target) {
+
+        Inventory editInv = Bukkit.createInventory(
+                null,
+                27,
+                "§cEdit Lives"
+        );
+
+        int currentLives = getLives(target);
+
+        // PLAYER HEAD
+        ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
+
+        ItemMeta headMeta = playerHead.getItemMeta();
+
+        headMeta.setDisplayName("§e" + target.getName());
+
+        List<String> lore = new ArrayList<>();
+
+        lore.add("§7Current Lives: §c" + currentLives);
+
+        headMeta.setLore(lore);
+
+        playerHead.setItemMeta(headMeta);
+
+        // +1 LIFE
+        ItemStack add = new ItemStack(Material.LIME_WOOL);
+
+        ItemMeta addMeta = add.getItemMeta();
+
+        addMeta.setDisplayName("§a+1 Life");
+
+        add.setItemMeta(addMeta);
+
+        // -1 LIFE
+        ItemStack remove = new ItemStack(Material.RED_WOOL);
+
+        ItemMeta removeMeta = remove.getItemMeta();
+
+        removeMeta.setDisplayName("§c-1 Life");
+
+        remove.setItemMeta(removeMeta);
+
+        // SET ITEMS
+        editInv.setItem(13, playerHead);
+        editInv.setItem(11, add);
+        editInv.setItem(15, remove);
+
+        admin.openInventory(editInv);
     }
 
     // =========================
