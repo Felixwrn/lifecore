@@ -7,14 +7,15 @@ A modern, lightweight and highly customizable **Minecraft 1.21.x life system plu
 ## ✨ Features
 
 ### 🎮 Game Modes
+
 - **Hardcore Mode**
   - Players lose lives on death
-  - Zero lives = kick (or elimination system)
+  - Zero lives = ban
 
-- **Lifesteal Mode**
-  - Players gain lives by killing other players
-  - Configurable steal amount and maximum lives
-
+ - **Hardcore + Mode**
+    - Players has 3 Lives
+    - Zero lives = ban
+   
 ---
 
 ### 💾 Storage System
