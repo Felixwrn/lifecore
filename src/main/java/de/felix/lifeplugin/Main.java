@@ -10,6 +10,7 @@ import de.wrn.api.api.WRNAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.BanList;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -354,20 +355,7 @@ public class Main extends JavaPlugin implements Listener {
 
         saveConfig();
 
-        HashMap<String, String> placeholders = new HashMap<>();
-
-        placeholders.put(
-                "lives",
-                String.valueOf(lives)
-        );
-
-        p.sendMessage(
-                WRNAPI.text(
-                        p.getUniqueId(),
-                        "lives_display",
-                        placeholders
-                )
-        );
+        p.sendMessage("§cLives remaining: §f" + lives);
 
         // CURRENT MODE
         String mode = getServerMode();
@@ -384,9 +372,26 @@ public class Main extends JavaPlugin implements Listener {
 
             if (banOnZero) {
 
-                p.setGameMode(GameMode.SPECTATOR);
+                // BAN PLAYER
+                Bukkit.getBanList(BanList.Type.NAME).addBan(
+                        p.getName(),
+                        "You lost all your lives!",
+                        null,
+                        "WRN LifeCore"
+                );
 
-                p.sendMessage("§cYou are now in spectator mode!");
+                p.kickPlayer("§cYou lost all your lives!");
+
+            } else {
+
+                // SPECTATOR MODE
+                Bukkit.getScheduler().runTaskLater(this, () -> {
+
+                    p.setGameMode(GameMode.SPECTATOR);
+
+                    p.sendMessage("§7You are now in spectator mode!");
+
+                }, 2L);
             }
         }
     }
