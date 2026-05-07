@@ -12,7 +12,7 @@ public class GitHubChallengeDownloader {
 
     // CHANGE THIS
     private static final String BASE_URL =
-            "https://raw.githubusercontent.com/WRNlabs/challenges/main/";
+            "https://raw.githubusercontent.com/Felixwrn/lifecore-challenges/main/";
 
     // CHALLENGES
     private static final String[] FILES = {
