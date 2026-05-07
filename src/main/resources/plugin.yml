@@ -8,16 +8,18 @@ depend:
   - WRN-API
 
 commands:
+
   livesgui:
-    description: Öffnet das Lives GUI
+    description: Opens the Lives GUI
     usage: /livesgui
     aliases:
       - lives
       - leben
       - life
+    permission: life.admin
 
   langgui:
-    description: Öffnet das Language GUI
+    description: Opens the Language GUI
     usage: /langgui
     aliases:
       - lang
@@ -25,17 +27,18 @@ commands:
       - langs
 
   modegui:
-    description: Öffnet das Mode GUI
+    description: Opens the Mode GUI
     usage: /modegui
     aliases:
       - mode
       - modes
 
   market:
-    description: Öffnet den Marketplace
+    description: Opens the Marketplace
     usage: /market
 
 permissions:
+
   life.admin:
-    description: Darf Leben ändern
+    description: Allows editing player lives
     default: op
