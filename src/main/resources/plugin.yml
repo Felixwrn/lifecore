@@ -33,9 +33,9 @@ commands:
       - mode
       - modes
 
-  market:
-    description: Opens the Marketplace
-    usage: /market
+ # market:
+  #  description: Opens the Marketplace
+   # usage: /market 
 
 permissions:
 
