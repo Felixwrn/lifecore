@@ -9,31 +9,30 @@ default-lives: 3
 max-lives: 10
 
 # =========================
-# MODE SYSTEM
+# SERVER MODE SYSTEM
 # =========================
 mode:
-  name: "Normal"
-  lives: 3
-  banOnZero: false
+  current: hardcore
 
 # =========================
 # MARKETPLACE MODES
 # =========================
 marketplace:
+
   hardcore:
-    name: "Hardcore"
+    name: Hardcore
     lives: 1
     banOnZero: true
 
   pro:
-    name: "Pro"
+    name: Pro
     lives: 5
     banOnZero: false
 
   vanilla_plus:
-    name: "Vanilla+"
+    name: Vanilla+
     lives: 3
-    banOnZero: false
+    banOnZero: true
 
 # =========================
 # PLAYER DATA (AUTO)
@@ -45,4 +44,4 @@ lives: {}
 # =========================
 settings:
   actionbar: true
-  update-interval: 40  # ticks (20 = 1 Sekunde)
+  update-interval: 40
