@@ -41,8 +41,10 @@ commands:
 permissions:
 
   life.admin:
-    description: Allows editing player lives
+    description: Allows Everything
     default: op
+    children:
+      life.mode: true
 
   life.mode:
     description: Allows to edit the server mode
