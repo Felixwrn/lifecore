@@ -8,6 +8,7 @@ import de.felix.lifeplugin.util.ActionBarUtil;
 import de.wrn.api.api.WRNAPI;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -37,30 +38,38 @@ public class Main extends JavaPlugin implements Listener {
 
         Bukkit.getPluginManager().registerEvents(this, this);
 
+        boolean actionbarEnabled = getConfig().getBoolean(
+                "settings.actionbar",
+                true
+        );
+
+        int interval = getConfig().getInt(
+                "settings.update-interval",
+                40
+        );
+
         // ActionBar Loop
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
+        if (actionbarEnabled) {
 
-            for (Player p : Bukkit.getOnlinePlayers()) {
+            Bukkit.getScheduler().runTaskTimer(this, () -> {
 
-                int lives = getConfig().getInt(
-                        "lives." + p.getUniqueId(),
-                        getConfig().getInt("default-lives", 3)
-                );
+                for (Player p : Bukkit.getOnlinePlayers()) {
 
-                String mode = getConfig().getString(
-                        "player-mode." + p.getUniqueId(),
-                        "normal"
-                );
+                    int lives = getLives(p);
 
-                ActionBarUtil.send(
-                        p,
-                        "§cLives: §f" + lives + " §7| §bMode: §f" + mode
-                );
-            }
+                    String mode = getServerMode();
 
-        }, 0L, 40L);
+                    ActionBarUtil.send(
+                            p,
+                            "§cLives: §f" + lives +
+                                    " §7| §bMode: §f" + mode
+                    );
+                }
 
-        getLogger().info("§aLifePlugin enabled!");
+            }, 0L, interval);
+        }
+
+        getLogger().info("§aWRN LifePlugin enabled!");
     }
 
     @Override
@@ -93,7 +102,7 @@ public class Main extends JavaPlugin implements Listener {
             return true;
         }
 
-        // Marketplace
+        // Marketplace GUI
         if (cmd.getName().equalsIgnoreCase("market")) {
             MarketplaceGUI.open(p);
             return true;
@@ -111,7 +120,7 @@ public class Main extends JavaPlugin implements Listener {
 
         String title = e.getView().getTitle();
 
-        // Cancel GUI interaction
+        // GUI Protection
         if (title.equals(LanguageGUI.TITLE)
                 || title.equals(LifeGUI.TITLE)
                 || title.equals(ModeGUI.TITLE)
@@ -130,7 +139,9 @@ public class Main extends JavaPlugin implements Listener {
             return;
         }
 
-        // ---------------- LANGUAGE GUI ----------------
+        // =========================
+        // LANGUAGE GUI
+        // =========================
 
         if (title.equals(LanguageGUI.TITLE)) {
 
@@ -145,31 +156,42 @@ public class Main extends JavaPlugin implements Listener {
             p.closeInventory();
         }
 
-        // ---------------- LIFE GUI ----------------
+        // =========================
+        // LIFE GUI
+        // =========================
 
         if (title.equals(LifeGUI.TITLE)) {
 
-            int lives = getConfig().getInt(
-                    "lives." + p.getUniqueId(),
-                    getConfig().getInt("default-lives", 3)
-            );
+            int lives = getLives(p);
 
-            // +1 Life
+            // +1
             if (e.getSlot() == 11) {
                 lives++;
             }
 
-            // -1 Life
+            // -1
             if (e.getSlot() == 15) {
                 lives--;
             }
 
-            // Prevent negative lives
+            int maxLives = getConfig().getInt(
+                    "max-lives",
+                    10
+            );
+
+            // Limits
             if (lives < 0) {
                 lives = 0;
             }
 
-            getConfig().set("lives." + p.getUniqueId(), lives);
+            if (lives > maxLives) {
+                lives = maxLives;
+            }
+
+            getConfig().set(
+                    "lives." + p.getUniqueId(),
+                    lives
+            );
 
             saveConfig();
 
@@ -178,7 +200,9 @@ public class Main extends JavaPlugin implements Listener {
             LifeGUI.open(p);
         }
 
-        // ---------------- MODE GUI ----------------
+        // =========================
+        // MODE GUI
+        // =========================
 
         if (title.equals(ModeGUI.TITLE)) {
 
@@ -187,26 +211,27 @@ public class Main extends JavaPlugin implements Listener {
             switch (e.getSlot()) {
 
                 case 11:
-                    mode = "normal";
-                    break;
-
-                case 13:
                     mode = "hardcore";
                     break;
 
+                case 13:
+                    mode = "pro";
+                    break;
+
                 case 15:
-                    mode = "chaos";
+                    mode = "vanilla_plus";
                     break;
 
                 default:
                     return;
             }
 
-            getConfig().set("player-mode." + p.getUniqueId(), mode);
+            // SAVE GLOBAL SERVER MODE
+            getConfig().set("mode.current", mode);
 
             saveConfig();
 
-            p.sendMessage("§aMode changed to: §e" + mode);
+            p.sendMessage("§aServer mode changed to: §e" + mode);
 
             p.closeInventory();
         }
@@ -217,10 +242,7 @@ public class Main extends JavaPlugin implements Listener {
 
         Player p = e.getEntity();
 
-        int lives = getConfig().getInt(
-                "lives." + p.getUniqueId(),
-                getConfig().getInt("default-lives", 3)
-        );
+        int lives = getLives(p);
 
         lives--;
 
@@ -228,13 +250,19 @@ public class Main extends JavaPlugin implements Listener {
             lives = 0;
         }
 
-        getConfig().set("lives." + p.getUniqueId(), lives);
+        getConfig().set(
+                "lives." + p.getUniqueId(),
+                lives
+        );
 
         saveConfig();
 
         HashMap<String, String> placeholders = new HashMap<>();
 
-        placeholders.put("lives", String.valueOf(lives));
+        placeholders.put(
+                "lives",
+                String.valueOf(lives)
+        );
 
         p.sendMessage(
                 WRNAPI.text(
@@ -244,25 +272,37 @@ public class Main extends JavaPlugin implements Listener {
                 )
         );
 
-        // Out of lives
+        // CURRENT MODE
+        String mode = getServerMode();
+
+        boolean banOnZero = getConfig().getBoolean(
+                "marketplace." + mode + ".banOnZero",
+                true
+        );
+
+        // OUT OF LIVES
         if (lives <= 0) {
 
             p.sendMessage("§cYou are out of lives!");
 
-            // Optional:
-            // p.setGameMode(GameMode.SPECTATOR);
-            // Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-            //         "ban " + p.getName() + " Out of lives");
+            if (banOnZero) {
+
+                p.setGameMode(GameMode.SPECTATOR);
+
+                p.sendMessage("§cYou are now in spectator mode!");
+            }
         }
     }
 
-    // ---------------- UTILS ----------------
+    // =========================
+    // UTIL METHODS
+    // =========================
 
-    public String getPlayerMode(Player p) {
+    public String getServerMode() {
 
         return getConfig().getString(
-                "player-mode." + p.getUniqueId(),
-                "normal"
+                "mode.current",
+                "hardcore"
         );
     }
 
