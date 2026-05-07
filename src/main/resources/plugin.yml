@@ -18,13 +18,13 @@ commands:
       - life
     permission: life.admin
 
-  langgui:
-    description: Opens the Language GUI
-    usage: /langgui
-    aliases:
-      - lang
-      - language
-      - langs
+  #langgui:
+    #description: Opens the Language GUI
+    #usage: /langgui
+    #aliases:
+      #- lang
+      #- language
+      #- langs
 
   modegui:
     description: Opens the Mode GUI
