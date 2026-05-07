@@ -1,5 +1,7 @@
 package de.felix.lifeplugin;
 
+import de.felix.lifeplugin.challenge.ChallengeListener;
+import de.felix.lifeplugin.challenge.ChallengeManager;
 import de.felix.lifeplugin.gui.LanguageGUI;
 import de.felix.lifeplugin.gui.LifeGUI;
 import de.felix.lifeplugin.gui.MarketplaceGUI;
@@ -7,10 +9,10 @@ import de.felix.lifeplugin.gui.ModeGUI;
 import de.felix.lifeplugin.util.ActionBarUtil;
 import de.wrn.api.api.WRNAPI;
 
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.BanList;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -45,7 +47,16 @@ public class Main extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
 
+        // MAIN EVENTS
         Bukkit.getPluginManager().registerEvents(this, this);
+
+        // CHALLENGE SYSTEM
+        ChallengeManager.loadChallenges();
+
+        Bukkit.getPluginManager().registerEvents(
+                new ChallengeListener(),
+                this
+        );
 
         boolean actionbarEnabled = getConfig().getBoolean(
                 "settings.actionbar",
