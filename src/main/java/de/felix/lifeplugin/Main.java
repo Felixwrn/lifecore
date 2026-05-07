@@ -9,6 +9,7 @@ import de.wrn.api.api.WRNAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,14 +17,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
 
     private static Main instance;
+
+    private final HashMap<UUID, UUID> selectedPlayer = new HashMap<>();
 
     public static Main getInstance() {
         return instance;
@@ -84,25 +90,65 @@ public class Main extends JavaPlugin implements Listener {
             return true;
         }
 
-        // Lives GUI
+        // =========================
+        // LIVES GUI
+        // =========================
+
         if (cmd.getName().equalsIgnoreCase("livesgui")) {
-            LifeGUI.open(p);
+
+            if (!p.hasPermission("life.admin")) {
+                p.sendMessage("§cNo permission!");
+                return true;
+            }
+
+            Inventory inv = Bukkit.createInventory(null, 54, LifeGUI.TITLE);
+
+            int slot = 0;
+
+            for (Player target : Bukkit.getOnlinePlayers()) {
+
+                ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+
+                ItemMeta meta = head.getItemMeta();
+
+                meta.setDisplayName("§e" + target.getName());
+
+                head.setItemMeta(meta);
+
+                inv.setItem(slot, head);
+
+                slot++;
+
+                if (slot >= 54) break;
+            }
+
+            p.openInventory(inv);
+
             return true;
         }
 
-        // Language GUI
+        // =========================
+        // LANGUAGE GUI
+        // =========================
+
         if (cmd.getName().equalsIgnoreCase("langgui")) {
             LanguageGUI.open(p);
             return true;
         }
 
-        // Mode GUI
+        // =========================
+        // MODE GUI
+        // =========================
+
         if (cmd.getName().equalsIgnoreCase("modegui")) {
             ModeGUI.open(p);
             return true;
         }
 
-        // Marketplace GUI
+        // =========================
+        // MARKETPLACE GUI
+        // =========================
+
         if (cmd.getName().equalsIgnoreCase("market")) {
             MarketplaceGUI.open(p);
             return true;
@@ -124,7 +170,8 @@ public class Main extends JavaPlugin implements Listener {
         if (title.equals(LanguageGUI.TITLE)
                 || title.equals(LifeGUI.TITLE)
                 || title.equals(ModeGUI.TITLE)
-                || title.equals(MarketplaceGUI.TITLE)) {
+                || title.equals(MarketplaceGUI.TITLE)
+                || title.equals("§cEdit Lives")) {
 
             e.setCancelled(true);
         }
@@ -157,12 +204,74 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         // =========================
-        // LIFE GUI
+        // PLAYER SELECT GUI
         // =========================
 
         if (title.equals(LifeGUI.TITLE)) {
 
-            int lives = getLives(p);
+            String playerName = item.getItemMeta()
+                    .getDisplayName()
+                    .replace("§e", "");
+
+            Player target = Bukkit.getPlayer(playerName);
+
+            if (target == null) {
+                p.sendMessage("§cPlayer offline!");
+                return;
+            }
+
+            selectedPlayer.put(
+                    p.getUniqueId(),
+                    target.getUniqueId()
+            );
+
+            Inventory editInv = Bukkit.createInventory(
+                    null,
+                    27,
+                    "§cEdit Lives"
+            );
+
+            // +1 Life
+            ItemStack add = new ItemStack(Material.LIME_WOOL);
+
+            ItemMeta addMeta = add.getItemMeta();
+
+            addMeta.setDisplayName("§a+1 Life");
+
+            add.setItemMeta(addMeta);
+
+            // -1 Life
+            ItemStack remove = new ItemStack(Material.RED_WOOL);
+
+            ItemMeta removeMeta = remove.getItemMeta();
+
+            removeMeta.setDisplayName("§c-1 Life");
+
+            remove.setItemMeta(removeMeta);
+
+            editInv.setItem(11, add);
+            editInv.setItem(15, remove);
+
+            p.openInventory(editInv);
+        }
+
+        // =========================
+        // EDIT LIVES GUI
+        // =========================
+
+        if (title.equals("§cEdit Lives")) {
+
+            UUID targetUUID = selectedPlayer.get(p.getUniqueId());
+
+            if (targetUUID == null) {
+                p.sendMessage("§cNo player selected!");
+                return;
+            }
+
+            int lives = getConfig().getInt(
+                    "lives." + targetUUID,
+                    getConfig().getInt("default-lives", 3)
+            );
 
             // +1
             if (e.getSlot() == 11) {
@@ -179,7 +288,6 @@ public class Main extends JavaPlugin implements Listener {
                     10
             );
 
-            // Limits
             if (lives < 0) {
                 lives = 0;
             }
@@ -189,15 +297,21 @@ public class Main extends JavaPlugin implements Listener {
             }
 
             getConfig().set(
-                    "lives." + p.getUniqueId(),
+                    "lives." + targetUUID,
                     lives
             );
 
             saveConfig();
 
-            p.sendMessage("§aLives updated: §e" + lives);
+            Player target = Bukkit.getPlayer(targetUUID);
 
-            LifeGUI.open(p);
+            if (target != null) {
+                target.sendMessage(
+                        "§eYour lives were updated: §c" + lives
+                );
+            }
+
+            p.sendMessage("§aLives updated!");
         }
 
         // =========================
