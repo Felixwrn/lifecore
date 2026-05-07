@@ -34,6 +34,10 @@ commands:
       - modes
     permission: life.mode
 
+  challenge:
+    description: Open the Challenge GUI
+    usage: /challenge
+
  # market:
   #  description: Opens the Marketplace
    # usage: /market 
