@@ -9,8 +9,6 @@ import de.felix.lifeplugin.gui.LifeGUI;
 import de.felix.lifeplugin.gui.MarketplaceGUI;
 import de.felix.lifeplugin.gui.ModeGUI;
 import de.felix.lifeplugin.util.ActionBarUtil;
-import de.wrn.api.api.WRNAPI;
-
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -262,27 +260,6 @@ public class Main extends JavaPlugin implements Listener {
             return;
         }
 
-        // =========================
-        // LANGUAGE GUI
-        // =========================
-
-        if (title.equals(LanguageGUI.TITLE)) {
-
-            String name = item.getItemMeta().getDisplayName();
-
-            String lang = name.contains("(en)") ? "en" : "de";
-
-            WRNAPI.setLanguage(
-                    p.getUniqueId(),
-                    lang
-            );
-
-            p.sendMessage(
-                    "§aLanguage changed to §e" + lang
-            );
-
-            p.closeInventory();
-        }
 
         // =========================
         // PLAYER SELECT GUI

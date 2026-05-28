@@ -12,23 +12,25 @@
 
     <name>LifePlugin</name>
 
-    <!-- JAVA VERSION -->
     <properties>
         <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- REPOSITORIES -->
     <repositories>
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+
+        <repository>
+            <id>local-project-repo</id>
+            <url>file://${project.basedir}/libs</url>
+        </repository>
     </repositories>
 
-    <!-- DEPENDENCIES -->
     <dependencies>
 
-        <!-- Spigot -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -36,16 +38,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- 🔥 WRN API (DEIN FIX) -->
-<dependency>
-    <groupId>de.wrn</groupId>
-    <artifactId>wrn-api</artifactId>
-    <version>1.0</version>
-    <scope>system</scope>
-    <systemPath>${project.basedir}/libs/wrn-api.jar</systemPath>
-</dependency>
-
-        <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -54,11 +46,9 @@
 
     </dependencies>
 
-    <!-- BUILD -->
     <build>
         <plugins>
 
-            <!-- Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -69,7 +59,6 @@
                 </configuration>
             </plugin>
 
-            <!-- SHADE -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
