@@ -149,9 +149,6 @@ ul,ol{
     <div class="nav">
         <a href="#install">Installation</a>
         <a href="#commands">Commands</a>
-        <a href="#config">Configuration</a>
-        <a href="#api">Developer API</a>
-        <a href="#devmode">DevMode</a>
         <a href="#roadmap">Roadmap</a>
     </div>
 </div>
@@ -169,7 +166,6 @@ ul,ol{
     <h2>Installation</h2>
 
     <ol>
-        <li>Download <code>WRN-API.jar</code></li>
         <li>Download <code>LifeCore.jar</code></li>
         <li>Put both files into your plugins folder</li>
         <li>Restart your server</li>
@@ -184,50 +180,8 @@ ul,ol{
 /langgui
 /modegui
 /market
-/wrn devmode
-/wrn confirm &lt;plugin&gt;
-</pre>
-</div>
-
-<div class="card" id="config">
-    <h2>Configuration</h2>
-
-<pre>
-default-lives: 3
-
-dev-mode:
-  enabled: true
-  confirmed-plugins: []
-</pre>
-</div>
-
-<div class="card" id="api">
-    <h2>Developer API</h2>
-
-<pre>
-WRNAPI.getDevMode().isEnabled();
 </pre>
 
-<pre>
-&lt;dependency&gt;
-    &lt;groupId&gt;de.wrn&lt;/groupId&gt;
-    &lt;artifactId&gt;wrn-api&lt;/artifactId&gt;
-    &lt;version&gt;1.0&lt;/version&gt;
-&lt;/dependency&gt;
-</pre>
-</div>
-
-<div class="card" id="devmode">
-    <h2>DevMode</h2>
-
-    <p>
-        DevMode allows external plugins to access advanced WRN systems safely.
-    </p>
-
-<pre>
-/wrn devmode
-/wrn confirm ExamplePlugin
-</pre>
 </div>
 
 <div class="card" id="roadmap">
