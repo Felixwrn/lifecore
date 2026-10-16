@@ -1,6 +1,6 @@
 # ❤️ Lifecore
 
-A modern, lightweight and highly customizable **Minecraft 1.21.x life system plugin** featuring Hardcore & Lifesteal gameplay modes, MySQL support, GUI interfaces, and a JSON-based multi-language system.
+A modern, lightweight and highly customizable **Minecraft 26.3 life system plugin** featuring Hardcore & Lifesteal gameplay modes, MySQL support, GUI interfaces, and a JSON-based multi-language system.
 
 ---
 
@@ -104,3 +104,10 @@ lives: {}
 settings:
   actionbar: true
   update-interval: 40  # ticks (20 = 1 Sekunde)
+```
+
+## Build and installation (Minecraft 26.3)
+
+Requires Java 25 and Maven. Build with `mvn -B -ntp clean verify`; the shaded plugin is `target/lifeplugin-1.5.jar`. Install that JAR together with the current WRN-API build (`WRNapi/target/wrn-api-1.0.jar`) in the server `plugins/` directory, then start Minecraft 26.3 with Java 25. WRN-API is a required server plugin; it is not bundled in LifeCore. The obsolete unused `libs/wrn-api.jar` copy has been removed.
+
+Challenge files are downloaded from `raw.githubusercontent.com/Felixwrn/lifecore-challenges` on startup. The default local YAML storage does not require MySQL or an OpenAI key.
