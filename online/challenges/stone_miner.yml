@@ -1,0 +1,6 @@
+id: stone_miner
+name: Stone Miner
+type: BREAK_BLOCK
+target: STONE
+goal: 64
+reward: 100

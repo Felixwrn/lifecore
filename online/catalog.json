@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "lifesteal-starter",
+      "name": "LifeSteal Starter Pack",
+      "description": "A declarative LifeSteal mode and a stone-mining challenge. Existing local definitions are preserved unless overwrite is explicitly requested.",
+      "type": "pack",
+      "version": "1.0.0",
+      "url": "https://raw.githubusercontent.com/Felixwrn/lifecore/main/online/packs/lifesteal-starter.json",
+      "sha256": "048066eff65114407d417b560ec6686e03aaac559a60e5348f930ca2ae16df98"
+    }
+  ]
+}

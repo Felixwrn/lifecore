@@ -1,47 +1,50 @@
-# =========================
-# WRN LifePlugin Config
-# =========================
-
-# Standard Leben (für neue Spieler)
+# LifeCore 2.1 — existing lives and challenge-progress are migrated without deletion.
 default-lives: 3
-
-# Maximale Leben (für GUI Limit)
 max-lives: 10
-
-# =========================
-# SERVER MODE SYSTEM
-# =========================
 mode:
   current: hardcore
-
-# =========================
-# MARKETPLACE MODES
-# =========================
+storage:
+  type: FILE # FILE or MYSQL; a database error never silently resets data to YAML.
+  flush-seconds: 30
+  mysql:
+    host: localhost
+    port: 3306
+    database: lifecore
+    username: lifecore
+    password: ''
+    password-env: LIFECORE_MYSQL_PASSWORD
+    ssl-mode: VERIFY_IDENTITY
+    pool-size: 5
+    connection-timeout-ms: 5000
+ai:
+  enabled: false
+  api-key: ''
+  api-key-env: LIFECORE_OPENAI_API_KEY
+  model: gpt-4.1-mini
+  endpoint: https://api.openai.com/v1/chat/completions
+  timeout-seconds: 30
+online:
+  enabled: true
+  refresh-on-start: true
+  timeout-seconds: 15
+  allowed-hosts:
+    - raw.githubusercontent.com
+    - api.github.com
+    - github.com
+    - objects.githubusercontent.com
+    - release-assets.githubusercontent.com
 marketplace:
-
-  hardcore:
-    name: Hardcore
-    lives: 1
-    banOnZero: true
-
-  pro:
-    name: Pro
-    lives: 5
-    banOnZero: false
-
-  vanilla_plus:
-    name: Vanilla+
-    lives: 3
-    banOnZero: true
-
-# =========================
-# PLAYER DATA (AUTO)
-# =========================
+  catalog-url: https://raw.githubusercontent.com/Felixwrn/lifecore/main/online/catalog.json
+challenges:
+  index-url: https://raw.githubusercontent.com/Felixwrn/lifecore/main/online/challenges/index.json
+  refresh-on-start: true
+updates:
+  check-on-start: true
+  interval-minutes: 360
+  auto-download: false
+  releases-url: https://api.github.com/repos/Felixwrn/lifecore/releases/latest
 lives: {}
-
-# =========================
-# SETTINGS
-# =========================
+challenge-progress: {}
 settings:
   actionbar: true
   update-interval: 40

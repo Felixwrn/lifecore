@@ -1,0 +1,48 @@
+name: Build LifeCore
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mariadb:11.4
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+          MARIADB_DATABASE: lifecore_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      # Disposable CI database only; application defaults verify MySQL TLS.
+      LIFECORE_TEST_MYSQL_URL: jdbc:mysql://127.0.0.1:3306/lifecore_test?sslMode=DISABLED&allowPublicKeyRetrieval=true
+      LIFECORE_TEST_MYSQL_USER: root
+      LIFECORE_TEST_MYSQL_PASSWORD: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Build and test, including database migration
+        run: mvn -B -ntp clean verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lifecore-test-results
+          path: target/surefire-reports/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lifecore-plugin
+          path: target/lifeplugin-*.jar
+          if-no-files-found: error
