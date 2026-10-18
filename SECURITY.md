@@ -1,6 +1,7 @@
 # Security policy
 
-The maintained development version is LifeCore 2.1.x for Minecraft 26.3/Java25.
+The maintained version is LifeCore 2.1.x for Minecraft 26.3/Java 25.
+LifeCore 2.0, 1.5 and earlier versions no longer receive security updates.
 Report vulnerabilities through this repository's private GitHub security-advisory
 flow. Do not include API keys, database passwords or player data in public issues.
 
