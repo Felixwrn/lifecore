@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "challenges": [
+    {
+      "id": "stone_miner",
+      "url": "https://raw.githubusercontent.com/Felixwrn/lifecore/main/online/challenges/stone_miner.yml",
+      "sha256": "0b42239618437fb13451cc06144a6a5c080742d0a56522fdd7b4f985de6cf588"
+    }
+  ]
+}

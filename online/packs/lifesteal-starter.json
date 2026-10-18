@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "modes": [
+    {
+      "id": "lifesteal-starter",
+      "name": "LifeSteal Starter",
+      "description": "Ten starting lives. Gain one life per player kill and lose one on death.",
+      "icon": "REDSTONE",
+      "starting-lives": 10,
+      "max-lives": 20,
+      "lose-on-death": true,
+      "steal-on-kill": true,
+      "steal-amount": 1,
+      "ban-on-zero": false
+    }
+  ],
+  "challenges": [
+    {
+      "id": "stone_miner",
+      "name": "Stone Miner",
+      "type": "BREAK_BLOCK",
+      "target": "STONE",
+      "goal": 64,
+      "reward": 100
+    }
+  ]
+}

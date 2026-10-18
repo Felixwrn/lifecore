@@ -1,0 +1,32 @@
+name: Publish verified update
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    uses: ./.github/workflows/main.yml
+    permissions:
+      contents: read
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifecore-plugin
+          path: target
+      - name: Generate manifest from the tested release JAR
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 tools/create-update-manifest.py target/lifeplugin-*.jar --repository "$GITHUB_REPOSITORY" --tag "$RELEASE_TAG" --output target/lifecore-update.json
+      - name: Publish JAR and its verified-update manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" --verify-tag --generate-notes target/lifeplugin-*.jar target/lifecore-update.json

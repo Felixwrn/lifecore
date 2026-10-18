@@ -149,7 +149,7 @@ ul,ol{
     <div class="nav">
         <a href="#install">Installation</a>
         <a href="#commands">Commands</a>
-        <a href="#roadmap">Roadmap</a>
+        <a href="#roadmap">LifeCore 2.1</a>
     </div>
 </div>
 
@@ -158,7 +158,7 @@ ul,ol{
 <div class="hero">
     <h1>WRN LifeCore Docs</h1>
     <p>
-        The next-generation modular life system for Minecraft servers powered by WRN API.
+        LifeCore 2.1 for Minecraft 26.3 and Java 25, with WRN API.
     </p>
 </div>
 
@@ -166,7 +166,7 @@ ul,ol{
     <h2>Installation</h2>
 
     <ol>
-        <li>Download <code>LifeCore.jar</code></li>
+        <li>Build <code>lifeplugin-2.1.0.jar</code> with Java 25 and install the current WRN-API.</li>
         <li>Put both files into your plugins folder</li>
         <li>Restart your server</li>
     </ol>
@@ -179,23 +179,28 @@ ul,ol{
 /livesgui
 /langgui
 /modegui
+/mode create my_mode
+/mode ai my_mode &lt;description&gt;
 /market
+/challenge
+/lifecore update check
 </pre>
 
 </div>
 
 <div class="card" id="roadmap">
-    <h2>Roadmap</h2>
-
+    <h2>LifeCore 2.1 Features</h2>
     <ul>
-        <li>June 2026 The Cloud update</li>
-        <li>2026 Autumn Update</li>
-        <li>2026 Winter Update</li>
-        <li>2027 Spring Update</li>
-        <li>2027 Summer Expansion</li>
-        <li>2027 Autumn Expansion</li>
-        <li>2027 Winter Performance Update</li>
+        <li>Reworked pooled MySQL system and asynchronous player profiles</li>
+        <li>AI Mode Builder: text to validated game-mode preview</li>
+        <li>GUI Mode Builder without AI</li>
+        <li>Configurable HTTPS online features</li>
+        <li>Online Marketplace: verified modes and packs</li>
+        <li>Online Challenges with persistent progress and XP rewards</li>
+        <li>Verified automatic updates, staged for server restart</li>
     </ul>
+    <p>The AI builder requires an API key. MySQL and automatic downloads are configured by the server operator.
+    See the repository README for commands, migration, online catalogue formats and release configuration.</p>
 </div>
 
 <div class="footer">

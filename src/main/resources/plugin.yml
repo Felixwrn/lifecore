@@ -1,55 +1,58 @@
 name: LifeCore
-version: 2.0
+version: 2.1.0
 main: de.felix.lifeplugin.Main
 api-version: '26.3'
 author: WRNlabs
-
-depend:
-  - WRN-API
-
+depend: [WRN-API]
 commands:
-
-  livesgui:
-    description: Opens the Lives GUI
-    usage: /livesgui
-    aliases:
-      - lives
-      - leben
-      - life
+  lifecore:
+    aliases: [lc]
+    description: LifeCore status, persistence and verified updates
+    usage: /lifecore <status|flush|update [check|download]>
     permission: life.admin
-
-  #langgui:
-    #description: Opens the Language GUI
-    #usage: /langgui
-    #aliases:
-      #- lang
-      #- language
-      #- langs
-
-  modegui:
-    description: Opens the Mode GUI
-    usage: /modegui
-    aliases:
-      - mode
-      - modes
+  mode:
+    description: Select, build or generate a game mode
+    usage: /mode <list|set id|create id|edit id|ai id description>
     permission: life.mode
-
+  modegui:
+    description: Open the mode selector
+    permission: life.mode
+  livesgui:
+    aliases: [lives, leben, life]
+    description: Edit online player lives
+    permission: life.admin
+  langgui:
+    aliases: [lang, language]
+    description: Choose player language
+    permission: life.language
+  market:
+    description: Browse and download verified mode packs
+    usage: /market [refresh|install id [--replace]]
+    permission: life.market
   challenge:
-    description: Open the Challenge GUI
-    usage: /challenge
-
- # market:
-  #  description: Opens the Marketplace
-   # usage: /market 
-
+    description: Show challenge progress or refresh the online challenge index
+    usage: /challenge [refresh]
+    permission: life.challenge
 permissions:
-
   life.admin:
-    description: Allows Everything
     default: op
     children:
       life.mode: true
-
+      life.ai: true
+      life.market: true
+      life.online: true
+      life.update: true
   life.mode:
-    description: Allows to edit the server mode
     default: op
+  life.ai:
+    default: op
+  life.market:
+    default: op
+  life.online:
+    default: op
+  life.update:
+    default: op
+  life.language:
+    default: true
+  life.challenge:
+    default: true
